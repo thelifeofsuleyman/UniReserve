@@ -106,3 +106,7 @@ User feedback led to a deliberate visual redesign (change request [`CR-001`](doc
 The Studio is **not** a real physical campus floor plan: placements are illustrative, and status comes from confirmed reservation records rather than occupancy sensors. Green = available now, yellow = confirmed booking within the next 15 minutes, red = confirmed booking active now, grey = disabled. Pending approvals do not hold capacity. The read-only browser view refreshes every 30 seconds; the database transaction still makes the final decision.
 
 See the [UI review notes](docs/ui/M55_VISUAL_REVIEW.md) and [owner feedback log](docs/ui/UI_FEEDBACK_LOG.md). The owner has not yet reviewed the revised interface.
+
+## Milestone 6: Formal test and coverage evidence
+
+The test package includes a [formal test plan](docs/testing/TEST_PLAN.md), [traceable test cases](docs/testing/TEST_CASES.md), [verified CI test report](docs/testing/M6_TEST_REPORT.md), [measured performance report](docs/testing/M6_PERFORMANCE_REPORT.md) and [defect log](docs/testing/DEFECT_LOG.md). Run `python scripts/measure_latency.py` to repeat the NFR-001 200-request probe. This does **not** claim full user-study or keyboard-accessibility verification; those require real manual sessions and are explicitly marked unmeasured.

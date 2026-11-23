@@ -32,3 +32,5 @@ jobs:
         with:
           name: coverage-python311
           path: coverage.xml
+      - name: NFR-001 catalogue and availability HTTP latency probe
+        run: python scripts/measure_latency.py
