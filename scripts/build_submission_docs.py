@@ -272,7 +272,8 @@ def main():
        ('Six Detailed Use Cases','docs/requirements/USE_CASES-v1.md'),
        ('Appendix A: Existing Systems — LibCal and Skedda','docs/requirements/EXISTING_SYSTEMS_REVIEW.md'),
        ('Appendix B: AzTU-inspired booking change','docs/change-management/CR-002-aztu-seat-reservations.md'),
-       ('Appendix C: CR-003 UI and fair-use change','docs/change-management/CR-003-ux-and-integrity.md')])
+       ('Appendix C: CR-003 UI and fair-use change','docs/change-management/CR-003-ux-and-integrity.md'),
+       ('Appendix D: CR-004 room-first redesign','docs/change-management/CR-004-space-first-rooms.md')])
     build_models_pdf()
     build_markdown_pdf('03_Test_Plan_and_Report.pdf','C / Test Plan and Report',[
        ('Testing Plan','docs/testing/TEST_PLAN.md'),
@@ -281,18 +282,21 @@ def main():
        ('Measured Performance Evidence','docs/testing/M6_PERFORMANCE_REPORT.md'),
        ('Defect Log','docs/testing/DEFECT_LOG.md'),
        ('AzTU Seat and Timetable Regression','docs/testing/CR-002_TEST_ADDENDUM.md'),
-       ('CR-003 UI and Booking Regression','docs/testing/CR-003_TEST_ADDENDUM.md')])
+       ('CR-003 UI and Booking Regression','docs/testing/CR-003_TEST_ADDENDUM.md'),
+       ('CR-004 photo, floor-plan and sync tests','docs/testing/CR-004_TEST_ADDENDUM.md')])
     build_markdown_pdf('04_Traceability_Matrix.pdf','D / Requirements Traceability',[
        ('Traceability and Explicit Gaps','docs/traceability/MATRIX.md'),
        ('CR-002 Seat and Lab Rule Traces','docs/traceability/CR-002-TRACEABILITY.md'),
-       ('CR-003 UI and Fair-use Traces','docs/traceability/CR-003-TRACEABILITY.md')],landscape_mode=True)
+       ('CR-003 UI and Fair-use Traces','docs/traceability/CR-003-TRACEABILITY.md'),
+       ('CR-004 room and catalogue links','docs/traceability/CR-004-TRACEABILITY.md')],landscape_mode=True)
     build_markdown_pdf('05_Process_Evidence.pdf','F / Process and Review Evidence',[
        ('Process History','docs/process/PROCESS_EVIDENCE.md'),
        ('Completed Self-Review Checklist','docs/process/SELF_REVIEW_CHECKLIST.md'),
        ('Issue Board','docs/process/ISSUES.md'),
        ('Owner Feedback and Change Analysis','docs/change-management/CR-001-visual-availability.md'),
        ('CR-002 AzTU Operational Change','docs/change-management/CR-002-aztu-seat-reservations.md'),
-       ('CR-003 Owner Feedback and Logic Audit','docs/change-management/CR-003-ux-and-integrity.md')])
+       ('CR-003 Owner Feedback and Logic Audit','docs/change-management/CR-003-ux-and-integrity.md'),
+       ('CR-004 Screenshot-based UI Rework','docs/change-management/CR-004-space-first-rooms.md')])
     build_markdown_pdf('06_Individual_Reflection_DRAFT.pdf','G / Individual Reflection — Draft for Review',[
        ('Personal Reflection — Draft','docs/reflection/REFLECTION_DRAFT.md')],cover=False,compact=True)
     verify()
