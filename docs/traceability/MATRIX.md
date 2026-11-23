@@ -17,7 +17,7 @@ Each UML filename is under `docs/diagrams/source`. Each code path and test ID po
 | FR-007 | UC-04 | 03-reservation-states.puml; 11-seq-UC-04-cancel.puml | `src/unireserve/services/booking.py`; `src/unireserve/web/app.py` | TC-014, TC-015, TC-016 | PASS |
 | FR-008 | UC-05 | 03-reservation-states.puml; 12-seq-UC-05-approve.puml | `src/unireserve/services/booking.py`; `src/unireserve/web/app.py` | TC-017, TC-018, TC-019 | PASS |
 | FR-009 | UC-06 | 05-erd-logical-3nf.puml; 13-seq-UC-06-resources.puml | `src/unireserve/services/booking.py`; `src/unireserve/web/templates/admin.html` | TC-020, TC-021 | PASS |
-| FR-010 | UC-01, UC-03, UC-04, UC-05, UC-06 | 06-design-classes.puml; 08-seq-UC-01-authenticate.puml; 12-seq-UC-05-approve.puml | `src/unireserve/web/app.py`; `src/unireserve/services/booking.py` | TC-013, TC-016, TC-021, TC-022, TC-023, TC-024, TC-034 | PASS |
+| FR-010 | UC-01, UC-03, UC-04, UC-05, UC-06 | 06-design-classes.puml; 08-seq-UC-01-authenticate.puml; 12-seq-UC-05-approve.puml | `src/unireserve/web/app.py`; `src/unireserve/services/booking.py` | TC-016, TC-021, TC-022, TC-023, TC-024, TC-034 | PASS |
 | FR-011 | UC-03, UC-04, UC-05 | 02-domain-model.puml; 05-erd-logical-3nf.puml; 10-seq-UC-03-request.puml; 11-seq-UC-04-cancel.puml | `src/unireserve/services/booking.py`; `src/unireserve/storage/db.py`; `src/unireserve/storage/models.py` | TC-025, TC-026, TC-027 | PASS |
 
 **Untraced Must functional requirements: none.** A full requirement cross-reference check is automated by `scripts/validate_traceability.py`. Testing results apply to the cited fixtures and CI environment, not every possible deployment.
