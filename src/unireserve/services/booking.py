@@ -211,6 +211,45 @@ class BookingService:
                                 s.closes_at, ",".join(str(d) for d in range(7) if s.open_days & (1 << d)), s.policy_note, s.is_enabled)
                     for s in session.scalars(select(Space).order_by(Space.id)).all()]
 
+    def create_space(self, actor_id: int, code: str, name: str, kind: str,
+                     opens_at: str, closes_at: str, open_days: str) -> SpaceRecord:
+        """Create a configurable area without relying on sample fixtures."""
+        from datetime import time
+        import re
+        code, name = code.strip().upper(), name.strip()
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{1,39}", code):
+            raise InvalidRequest("area code must contain 2–40 uppercase letters, numbers or hyphens")
+        if not name or len(name) > 120:
+            raise InvalidRequest("area name is required and must be 120 characters or less")
+        allowed = ("LIBRARY_SEAT", "LIBRARY_PC", "COMPUTER_LAB", "STUDY_ROOM")
+        if kind not in allowed:
+            raise InvalidRequest("select a supported area type")
+        try:
+            days = {int(value) for value in open_days.split(",")}
+            if not days or any(day < 0 or day > 6 for day in days):
+                raise ValueError("weekdays must be 0–6")
+            if len(opens_at) != 5 or len(closes_at) != 5:
+                raise ValueError("time must be HH:MM")
+            if time.fromisoformat(opens_at) >= time.fromisoformat(closes_at):
+                raise ValueError("opening must precede closing")
+        except (ValueError, TypeError) as exc:
+            raise InvalidRequest("enter valid HH:MM times and weekdays 0–6") from exc
+        with write_transaction(self.engine) as session:
+            self._actor(session, actor_id, admin=True)
+            if session.scalar(select(Space.id).where(Space.public_code == code)) is not None:
+                raise InvalidRequest("area code already exists")
+            space = Space(public_code=code, name=name, kind=kind,
+                          opens_at=opens_at, closes_at=closes_at,
+                          open_days=sum(1 << day for day in days),
+                          policy_note="Bookings follow published area hours.",
+                          is_enabled=True)
+            session.add(space)
+            session.flush()
+            return SpaceRecord(space.id, space.public_code, space.name, space.kind,
+                               space.opens_at, space.closes_at,
+                               ",".join(str(d) for d in sorted(days)),
+                               space.policy_note, space.is_enabled)
+
     def create_closure(self, actor_id: int, space_id: int, window: TimeWindow,
                        reason: str) -> int:
         if not reason.strip():

@@ -37,7 +37,7 @@ class AzTUWebTests(unittest.TestCase):
         self.assertIn(b'Library PC 01',page.data)
         self.assertIn(b'Lab Workstation 01',page.data)
         self.assertNotIn(b'Sony Mirrorless Camera',page.data)
-        self.assertIn(b'EXAMPLE LAYOUT',page.data)
+        self.assertIn(b'ROOM LAYOUT',page.data)
     def test_library_category_filter(self):
         self.signin()
         page=self.client.get('/resources?category=SEAT')

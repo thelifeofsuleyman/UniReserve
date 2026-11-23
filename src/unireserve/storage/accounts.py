@@ -1,4 +1,4 @@
-"""Local account provisioning and salted password hashes for demo users."""
+"""Trusted account provisioning and salted password hashes."""
 from __future__ import annotations
 import hashlib
 import hmac
@@ -12,7 +12,7 @@ ITERATIONS = 310_000
 
 def hash_password(password: str) -> str:
     if not isinstance(password, str) or len(password) < 10:
-        raise ValueError("demo passwords must have at least 10 characters")
+        raise ValueError("passwords must have at least 10 characters")
     salt = os.urandom(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, ITERATIONS)
     return "pbkdf2_sha256$%s$%s$%s" % (ITERATIONS, salt.hex(), digest.hex())
@@ -32,7 +32,7 @@ def verify_password(password: str, encoded: str) -> bool:
     except (ValueError, AttributeError, TypeError):
         return False
 
-def provision_demo_user(engine: Engine, email: str, password: str, role: str) -> int:
+def provision_user(engine: Engine, email: str, password: str, role: str) -> int:
     """Trusted one-off setup tool, not an unauthenticated web route."""
     email = email.strip().casefold()
     if not email or "@" not in email or role not in ("STUDENT", "STAFF", "ADMIN"):
@@ -45,3 +45,6 @@ def provision_demo_user(engine: Engine, email: str, password: str, role: str) ->
         session.add(user)
         session.flush()
         return user.id
+
+# Backward-compatible alias used by existing test fixtures and sample setup.
+provision_demo_user = provision_user

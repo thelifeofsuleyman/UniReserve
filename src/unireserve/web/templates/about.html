@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-heading compact">
+  <div><span class="eyebrow">SERVICE INFORMATION</span><h1>About UniReserve</h1>
+  <p class="subtitle">A simpler way to book campus study spaces.</p></div>
+</section>
+<div class="admin-grid">
+  <section class="panel pad">
+    <h2>How reservations work</h2>
+    <p>Choose a room or individual workstation, select a date and time, and confirm availability.
+    Some locations require administrator approval. A pending request is not a guaranteed reservation.</p>
+    <p>Availability indicators reflect <strong>confirmed reservations and configured opening hours</strong>.
+    They do not measure whether someone is physically sitting at a desk.</p>
+    <p>Your booking is checked again when you confirm it or an administrator approves it.</p>
+  </section>
+  <section class="panel pad">
+    <h2>Space information</h2>
+    <p>Room names, opening schedules and reservation permissions are maintained within this installation.
+    This independent university-inspired project is <strong>not an official AzTU service</strong>.
+    Room imagery and seating layouts are designed representations, not verified campus floor surveys.</p>
+    <p>For verified access rules, room changes or account assistance, contact the space administrator.</p>
+    <a class="button primary" href="{{ url_for('resources') }}">Browse study spaces ↗</a>
+  </section>
+</div>
+{% endblock %}

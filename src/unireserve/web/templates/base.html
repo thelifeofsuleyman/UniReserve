@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101b35">
+  <meta name="theme-color" content="#1b4238">
   <title>{{ page_title }} · UniReserve</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='refined.css') }}">
@@ -13,20 +13,20 @@
 {% if g.user %}
 <div class="app-shell">
   <aside class="sidebar" aria-label="Main navigation">
-    <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>A clearer view of campus.</small></span></a>
+    <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>Study spaces, made simple.</small></span></a>
     <div class="sidebar-section-label">WORKSPACE</div>
     <nav class="nav-list">
       <a href="{{ url_for('resources') }}" class="nav-link {{ 'active' if request.endpoint in ('resources', 'resource_detail', 'book', 'check_availability') else '' }}"><span class="nav-icon" aria-hidden="true">◫</span>Find a seat / PC</a>
-      <a href="{{ url_for('studio') }}" class="nav-link {{ 'active' if request.endpoint in ('studio', 'availability_status_json') else '' }}"><span class="nav-icon" aria-hidden="true">⌗</span>2D seat map <span class="nav-live">LIVE</span></a>
+      <a href="{{ url_for('studio') }}" class="nav-link {{ 'active' if request.endpoint in ('studio', 'availability_status_json') else '' }}"><span class="nav-icon" aria-hidden="true">⌗</span>2D seat map <span class="nav-live">STATUS</span></a>
       <a href="{{ url_for('my_reservations') }}" class="nav-link {{ 'active' if request.endpoint in ('my_reservations', 'reservation_detail', 'cancel_reservation') else '' }}"><span class="nav-icon" aria-hidden="true">▤</span>My reservations</a>
       {% if g.user.role == 'ADMIN' %}<a href="{{ url_for('admin') }}" class="nav-link {{ 'active' if request.endpoint in ('admin', 'admin_decision', 'admin_create_resource', 'admin_edit_resource') else '' }}"><span class="nav-icon" aria-hidden="true">⚙</span>Administration</a>{% endif %}
     </nav>
     <div class="sidebar-spacer"></div>
-    <div class="help-panel"><span class="help-orb">✦</span><strong>Find your study spot.</strong><p>Explore library seats and campus workstations.</p><a href="{{ url_for('resources') }}">Browse catalogue <span aria-hidden="true">↗</span></a></div>
+    <div class="help-panel"><strong>Ready to book?</strong><p>Browse available seats, PCs and meeting spaces.</p><a href="{{ url_for('studio') }}">Explore room layouts <span aria-hidden="true">↗</span></a></div>
     <div class="user-panel"><div class="avatar" aria-hidden="true">{{ g.user.email[:1]|upper }}</div><div class="user-label"><strong>{{ g.user.email.split('@')[0] }}</strong><span>{{ g.user.role|title }} account</span></div><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sign out" title="Sign out">↪</button></form></div>
   </aside>
   <main class="main-area">
-    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">AzTU · Example campus</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill"><span aria-hidden="true">◷</span> Local time · {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
+    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">Campus reservations</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill"><span aria-hidden="true">◷</span> Local time · {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
     <div class="content-wrap">
 {% else %}
 <div class="auth-wrap">
@@ -36,7 +36,7 @@
       {% endwith %}
       {% block content %}{% endblock %}
 {% if g.user %}
-      <footer class="page-footer"><strong>UniReserve</strong><span>·</span> Campus study-space prototype <span>·</span> Spaces and schedules are illustrative; check current university rules before relying on them.</footer>
+      <footer class="page-footer"><strong>UniReserve</strong><span>·</span> Book a better place to work <span>·</span> <a href="{{ url_for('about') }}">Service information</a></footer>
     </div>
   </main>
 </div>

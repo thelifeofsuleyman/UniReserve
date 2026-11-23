@@ -36,3 +36,7 @@ Original requirement scope featured equipment borrowing; the user later prioriti
 The current project uses synthetic accounts, generated illustration assets and demo seat counts/hours. It does not prove any actual AzTU student has official reservation rights for a given space. Owner-on-Windows visual, keyboard and multi-person usability checks are not reported as automated outcomes. The reflection remains an AI-assisted draft until student approval, and KOICA upload/instructor access is a separate action.
 
 See `docs/process/SELF_REVIEW_CHECKLIST.md` and `docs/testing/FINAL_HANDOFF_AUDIT.md`.
+
+
+## CR-005 — Product presentation iteration
+The owner explicitly requested a polished website without redundant internal reminders. The UI was edited accordingly, while source attribution, original generated-image disclosure and AI support remained in the one service-information page and coursework reports/reflection. This iteration also added a non-debug Waitress launch path and strict hosted configuration, plus trusted account/area provisioning without sample fixtures. This does not create a publicly hosted site. Actual QA results are linked from the GitHub feature PR.

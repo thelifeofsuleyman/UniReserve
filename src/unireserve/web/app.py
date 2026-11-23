@@ -15,6 +15,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import (Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request,
                    session, url_for)
+from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import SecurityError
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -34,20 +36,46 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 def create_app(test_config: dict | None = None) -> Flask:
     """Create an isolated Flask application (supports test database injection)."""
     app = Flask(__name__, template_folder="templates", static_folder="static")
+    mode = os.environ.get("UNIRESERVE_MODE", "local").strip().lower()
+    if mode not in ("local", "production"):
+        raise RuntimeError("UNIRESERVE_MODE must be local or production")
+    production = mode == "production"
+    configured_hosts = [h.strip() for h in os.environ.get("UNIRESERVE_TRUSTED_HOSTS", "").split(",") if h.strip()]
+
     app.config.update(
         SECRET_KEY=os.environ.get("UNIRESERVE_SECRET_KEY") or secrets.token_hex(32),
         DB_PATH=os.environ.get("UNIRESERVE_DB_PATH") or str(BASE_DIR / "instance" / "unireserve.sqlite3"),
         DISPLAY_TIMEZONE=os.environ.get("UNIRESERVE_TIMEZONE", "Asia/Baku"),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=False,  # local http://127.0.0.1 demonstration only
+        SESSION_COOKIE_SECURE=production,
+        TRUSTED_HOSTS=configured_hosts if production else None,
+        PRODUCTION_MODE=production,
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+        PREFERRED_URL_SCHEME="https" if production else "http",
         MAX_CONTENT_LENGTH=64 * 1024,
         AUTO_SAMPLE_CATALOG=None,  # explicitly enabled by the local demo launcher only
     )
     if test_config is not None:
         app.config.update(test_config)
+    if production and os.environ.get("UNIRESERVE_PROXY_COUNT"):
+        proxy_count = int(os.environ["UNIRESERVE_PROXY_COUNT"])
+        if not 1 <= proxy_count <= 3:
+            raise RuntimeError("UNIRESERVE_PROXY_COUNT must be between 1 and 3")
+        # Enable only behind the exact number of trusted reverse proxies.
+        # The reverse proxy must replace forwarded headers from clients.
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=proxy_count, x_host=proxy_count)
     if app.config["AUTO_SAMPLE_CATALOG"] is None:
         app.config["AUTO_SAMPLE_CATALOG"] = os.environ.get("UNIRESERVE_AUTO_SAMPLE_CATALOG", "0") == "1"
+    if app.config["PRODUCTION_MODE"]:
+        if (len(str(app.config.get("SECRET_KEY") or "")) < 32 or not os.environ.get("UNIRESERVE_SECRET_KEY") or str(app.config["SECRET_KEY"]).startswith("REPLACE_")):
+            raise RuntimeError("Production requires a stable UNIRESERVE_SECRET_KEY of at least 32 characters")
+        if not app.config.get("TRUSTED_HOSTS"):
+            raise RuntimeError("Production requires UNIRESERVE_TRUSTED_HOSTS")
+        if not app.config.get("SESSION_COOKIE_SECURE"):
+            raise RuntimeError("Production requires HTTPS-only session cookies")
+        if app.config["AUTO_SAMPLE_CATALOG"]:
+            raise RuntimeError("Automatic sample catalogue initialization is disabled in production")
     try:
         display_zone = ZoneInfo(app.config["DISPLAY_TIMEZONE"])
     except ZoneInfoNotFoundError as exc:
@@ -66,11 +94,43 @@ def create_app(test_config: dict | None = None) -> Flask:
     service = BookingService(engine)
     app.extensions["unireserve_engine"] = engine
 
+    @app.template_filter("area_title")
+    def area_title(value):
+        if not value:
+            return ""
+        return (str(value)
+                .replace("AzTU Library · ", "Library · ")
+                .replace(" (demo)", "")
+                .replace(" (sample)", ""))
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; font-src 'self' data:; connect-src 'self'; "
+            "form-action 'self'; frame-ancestors 'none'; base-uri 'self'")
+        if request.path.startswith("/static/"):
+            response.headers.setdefault("Cache-Control", "public, max-age=3600")
+        else:
+            response.headers["Cache-Control"] = "no-store"
+        if app.config["PRODUCTION_MODE"]:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
+        return response
+
     def actor_id() -> int:
         """Only trusted data from the signed Flask session supplies identity."""
         if g.user is None:
             raise AccessDenied("authentication is required")
         return g.user.id
+
+    @app.errorhandler(SecurityError)
+    def bad_host(_exc):
+        # Invalid Host may fail before routing; Jinja/url_for would repeat
+        # the same validation and incorrectly convert a 400 into a 500.
+        return "Invalid request", 400
 
     @app.before_request
     def load_user_and_check_csrf():
@@ -168,6 +228,19 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.get("/")
     def index():
         return redirect(url_for("resources") if g.user else url_for("login"))
+
+    @app.get("/about")
+    def about():
+        return render_template("about.html", page_title="Service information")
+
+    @app.get("/healthz")
+    def healthz():
+        try:
+            with engine.connect() as connection:
+                connection.exec_driver_sql("SELECT 1")
+        except Exception:
+            return jsonify({"status": "unavailable"}), 503
+        return jsonify({"status": "ok"})
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -437,6 +510,24 @@ def create_app(test_config: dict | None = None) -> Flask:
             return resolve_error(exc, url_for("admin"))
         return redirect(url_for("admin"))
 
+    @app.post("/admin/spaces")
+    @admin_required
+    def admin_create_space():
+        try:
+            service.create_space(
+                actor_id(),
+                request.form.get("code", ""),
+                request.form.get("name", ""),
+                request.form.get("kind", ""),
+                request.form.get("opens_at", ""),
+                request.form.get("closes_at", ""),
+                request.form.get("open_days", ""),
+            )
+            flash("Space created.", "success")
+        except BookingError as exc:
+            return resolve_error(exc, url_for("admin"))
+        return redirect(url_for("admin"))
+
     @app.post("/admin/spaces/<int:space_id>/closures")
     @admin_required
     def admin_add_closure(space_id: int):
@@ -457,7 +548,7 @@ def create_app(test_config: dict | None = None) -> Flask:
                                        request.form.get("opens_at", ""),
                                        request.form.get("closes_at", ""),
                                        request.form.get("open_days", ""))
-            flash("Example area schedule updated.", "success")
+            flash("Opening hours updated.", "success")
         except BookingError as exc:
             return resolve_error(exc, url_for("admin"))
         return redirect(url_for("admin"))

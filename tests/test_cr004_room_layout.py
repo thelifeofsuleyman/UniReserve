@@ -67,8 +67,8 @@ class RoomExperienceTests(unittest.TestCase):
 
     def test_each_room_has_its_own_logical_seat_count_and_layout(self):
         page = self.client.get('/studio').get_data(as_text=True)
-        self.assertIn('EXAMPLE LAYOUT', page)
-        self.assertIn('NOT TO SCALE', page)
+        self.assertIn('ROOM LAYOUT', page)
+        self.assertIn('SELECT A PLACE', page)
         self.assertIn('ACCESS AISLE', page)
         self.assertIn('TEACHING SCREEN', page)
         self.assertIn('6 PERSON TABLE', page)
