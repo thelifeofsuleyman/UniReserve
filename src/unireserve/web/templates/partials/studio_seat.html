@@ -1,0 +1,5 @@
+{% set resource=point.resource %}{% set state=point.status %}
+<a href="{{ url_for('resource_detail',resource_id=resource.id) }}" class="aztu-seat room-seat state-{{ state.state|lower }}" data-resource-id="{{ resource.id }}" data-state="{{ state.state }}" aria-label="{{ resource.name }}: {{ state.state|lower }}. Open reservation page">
+  <span class="room-seat__furniture" aria-hidden="true"><span class="room-seat__desk">{% if group.space.kind in ('LIBRARY_PC','COMPUTER_LAB') %}<span class="room-seat__monitor"></span>{% else %}<span class="room-seat__notebook"></span>{% endif %}</span><span class="room-seat__chair"></span></span>
+  <span class="pin-name">{{ resource.name }}</span><span class="seat-state" data-status-text>{{ {'AVAILABLE':'Available','SOON':'Soon','OCCUPIED':'Booked','CLOSED':'Closed','DISABLED':'Unavailable'}[state.state] }}</span>
+</a>

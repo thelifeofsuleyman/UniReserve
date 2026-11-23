@@ -1,0 +1,81 @@
+/* CR-004: space-first catalogue and coherent, position-specific floor plans. */
+.campus-hero{display:grid;grid-template-columns:1fr .88fr;min-height:345px;background:#1b4238;border-radius:22px;overflow:hidden;color:#fff;box-shadow:0 20px 38px rgba(16,47,36,.12);margin:2px 0 22px}
+.campus-hero__copy{padding:42px clamp(28px,4vw,68px);display:flex;flex-direction:column;justify-content:center}
+.campus-hero__copy .eyebrow{color:#decda4;letter-spacing:.17em}
+.campus-hero__copy h1{font-family:Georgia,'Times New Roman',serif;font-weight:500;letter-spacing:-.055em;line-height:1.03;font-size:clamp(37px,4.15vw,63px);margin:14px 0 17px}
+.campus-hero__copy h1 em{color:#eccd9a;font-weight:400}
+.campus-hero__copy p{color:#d1e5d9;max-width:530px;font-size:14px;line-height:1.75;margin:0 0 25px}
+.campus-hero__actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.campus-hero__actions>span{font-size:11px;color:#b9d2c4}
+.campus-hero__visual{min-height:315px;position:relative;background:#d8e4d6;overflow:hidden}
+.campus-hero__visual img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:45% 48%;filter:saturate(.95)}
+.campus-hero__visual:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(27,66,56,.27),transparent 38%,rgba(10,39,29,.14))}
+.campus-hero__visual span{position:absolute;bottom:18px;right:20px;color:#fff;font-size:10px;letter-spacing:.13em;font-weight:800;z-index:1;text-shadow:0 2px 6px #001a}
+.campus-note{display:flex;align-items:start;gap:11px;margin:0 0 37px;border:1px solid #e2e4d5;border-left:3px solid #c7974e;background:#fdfaf1;padding:13px 18px;border-radius:10px}
+.campus-note>span{font-size:17px;color:#8a662c}.campus-note p{margin:0;color:#52675a;font-size:11px;line-height:1.7}
+.campus-section{margin-bottom:43px}.campus-section .section-heading{margin-bottom:19px;gap:18px;align-items:end}
+.campus-section .section-heading h2{font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:clamp(28px,3vw,37px);margin:3px 0 6px}.campus-section .section-heading p{font-size:12px}
+.campus-zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.campus-zone-card{background:#fffefa;border:1px solid #dae5db;border-radius:17px;box-shadow:0 11px 29px #173b2910;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s}
+.campus-zone-card:hover{transform:translateY(-3px);box-shadow:0 18px 35px #173b2920}
+.campus-zone-card__picture{height:230px;position:relative;display:block;overflow:hidden;background:#dae3d5}
+.campus-zone-card__picture:focus-visible{outline:3px solid #c78e43;outline-offset:-3px}
+.campus-zone-card__picture img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}.campus-zone-card__picture:hover img{transform:scale(1.035)}
+.campus-zone-card__number{position:absolute;left:18px;top:18px;background:#fcfff2ef;padding:8px 12px;border-radius:7px;font-size:10px;letter-spacing:.15em;font-weight:850;color:#1b4b37}
+.campus-zone-card__body{padding:22px 24px 20px;flex:1;display:flex;flex-direction:column}
+.campus-zone-card__meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;text-transform:uppercase;letter-spacing:.13em;font-size:10px;font-weight:750;color:#648173}
+.campus-zone-card__body h3{font-family:Georgia,'Times New Roman',serif;font-size:27px;line-height:1.15;font-weight:500;margin:15px 0 8px}
+.campus-zone-card__body p{font-size:12px;color:#65786b;margin-bottom:22px;min-height:20px;line-height:1.5}
+.campus-zone-card__foot{border-top:1px solid #e5ebe3;margin-top:auto;padding-top:16px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;font-weight:750;color:#537163}
+.campus-zone-card__foot a{background:#e6f0e7;color:#145c45;padding:9px 13px;border-radius:8px}.campus-zone-card__foot a:hover{background:#175844;color:white}
+.campus-directory{scroll-margin-top:110px}.campus-count{border-radius:20px;padding:7px 12px;font-size:11px;font-weight:750;background:#eaf2e9;color:#46715b}
+.campus-units{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.campus-unit{display:flex;align-items:center;min-width:0;gap:12px;border:1px solid #dfe7de;background:#fffefa;padding:13px 16px;border-radius:12px;transition:background .16s,border-color .16s,box-shadow .16s}
+.campus-unit:hover{background:#f0f6f0;border-color:#b9d8c6;box-shadow:0 6px 16px #124f2f0c}
+.campus-unit__icon{flex:0 0 44px;width:44px;height:44px;border:1px solid #d6e4d6;border-radius:10px;background:#eef4ec;display:grid;place-items:center;font-size:22px;color:#387458}
+.campus-unit__details{flex:1;min-width:0}.campus-unit__details strong,.campus-unit__details small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.campus-unit__details strong{color:#20453b;font-size:13px}.campus-unit__details small{color:#788b7b;font-size:10px;margin-top:3px}
+.campus-unit__arrow{font-size:18px;color:#537963}.campus-unit .signal-pill{flex:0 0 auto;font-size:10px}
+.room-plan{border-radius:16px;background:#edf1ea;border:1px solid #d2dfd1;padding:15px 16px 13px;overflow:hidden}
+.room-plan__topline,.room-plan__bottomline{display:flex;justify-content:space-between;gap:16px;text-transform:uppercase;letter-spacing:.085em;font-size:10px;font-weight:800;color:#62816d;margin-bottom:11px}
+.room-plan__bottomline{margin:12px 0 0;letter-spacing:.03em;text-transform:none;font-weight:650}
+.room-plan__walls{position:relative;border:8px solid #b5c7b8;border-radius:9px;background:#f8f8f1;min-height:400px;padding:35px 36px 44px;box-shadow:inset 0 0 0 2px #e4eae2;overflow:hidden}
+.room-plan__walls:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#dce5da33 1px,transparent 1px),linear-gradient(90deg,#dce5da33 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+.room-plan__window{position:absolute;left:16%;width:35%;height:8px;top:-8px;background:repeating-linear-gradient(90deg,#84b7b7 0,#84b7b7 48px,#d9e8dc 48px,#d9e8dc 54px);z-index:1}
+.room-plan__board{position:relative;margin:0 auto 23px;width:min(67%,520px);background:#dbe7dd;border:4px solid #abbcb2;padding:10px;text-align:center;letter-spacing:.14em;font-size:10px;font-weight:850;color:#64766c;border-radius:3px;box-shadow:0 5px 0 #adbcb176}
+.room-plan__workstations{position:relative;max-width:910px;margin:2px auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(38px,13%) minmax(0,1fr);align-items:stretch;gap:16px}
+.room-plan__bank{display:grid;grid-template-columns:1fr;gap:13px;align-items:stretch;min-width:0}
+.room-plan__aisle{border-left:1px dashed #a5b9aa;border-right:1px dashed #a5b9aa;display:grid;place-items:center;color:#95a99b;font-size:9px;letter-spacing:.15em;font-weight:800;writing-mode:vertical-rl;text-align:center;min-height:220px}
+.room-plan__aisle span{padding:15px 0}
+.room-seat{border-radius:10px;border-width:2px!important;display:flex;flex-direction:row;gap:12px;justify-content:flex-start;align-items:center;text-align:left;padding:11px 15px!important;min-height:86px!important;background:#fffefa;box-shadow:0 4px 10px #36553b0c!important;text-decoration:none!important}
+.room-seat:hover,.room-seat:focus-visible{transform:translateY(-2px)}.room-seat .pin-name{font-size:12px;font-weight:750;color:#274d39}.room-seat .seat-state{font-size:10px;margin-left:auto;text-transform:none;letter-spacing:0}
+.room-seat__furniture{display:flex;align-items:center;flex-direction:column;gap:4px;flex:0 0 63px}.room-seat__desk{width:63px;height:30px;border:3px solid #9bada3;background:#e8e9dd;border-radius:4px;display:grid;place-items:center}
+.room-seat__monitor{width:34px;height:20px;background:#264d48;border:3px solid #8ba69b;border-radius:3px;box-shadow:0 3px 0 -1px #6a887a}
+.room-seat__notebook{width:27px;height:16px;border:2px solid #bed0bd;border-top:4px solid #dae7d6;border-radius:2px;transform:rotate(-9deg)}
+.room-seat__chair{width:31px;height:11px;border-radius:8px 8px 5px 5px;background:#8fa39b;border:2px solid #738e81}
+.room-seat.state-available{background:#f4fbf1;border-color:#68ac85!important}
+.room-seat.state-soon{background:#fff8e7;border-color:#d4ac5c!important}
+.room-seat.state-occupied{background:#fff1ec;border-color:#cf8579!important}
+.room-seat.state-closed{background:#f2f3f2;border-color:#a9b6b5!important}
+.room-seat.state-disabled{opacity:.72;border-color:#b1b1ae!important}
+.room-plan__door{position:absolute;bottom:-8px;left:45%;width:110px;text-align:center;padding:6px 8px;background:#f8f8f1;border:1px solid #bbcbbb;border-bottom:0;border-radius:8px 8px 0 0;color:#627e70;font-weight:900;font-size:9px;letter-spacing:.1em}
+.room-plan--computer-lab .room-plan__walls{background:#eef2ef}.room-plan--computer-lab .room-seat__desk{background:#d9e2e2}
+.room-plan--library-seat .room-seat__desk{background:#efe4d2}.room-plan--library-seat .room-seat__chair{background:#c4a88b}
+.room-plan--study-room .room-plan__walls{min-height:490px}
+.room-plan__group-room{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:35px;min-height:370px}
+.room-plan__group-table{position:relative;width:min(430px,70%);height:176px;border:5px solid #ae9579;background:linear-gradient(120deg,#e6d2b2,#d8bc95);border-radius:35px;box-shadow:0 10px 0 #ae94755c;display:grid;place-items:center}
+.room-plan__group-table>span{font-size:12px;letter-spacing:.13em;color:#76614b;font-weight:850}
+.room-plan__group-table i{position:absolute;width:43px;height:27px;border-radius:9px;background:#96a6a0;border:3px solid #6e887d}
+.room-plan__group-table i:nth-child(1){top:-38px;left:20%}.room-plan__group-table i:nth-child(2){top:-38px;right:20%}.room-plan__group-table i:nth-child(3){bottom:-38px;left:20%}.room-plan__group-table i:nth-child(4){bottom:-38px;right:20%}
+.room-plan__group-table i:nth-child(5){top:43%;left:-53px;transform:rotate(90deg)}.room-plan__group-table i:nth-child(6){top:43%;right:-53px;transform:rotate(90deg)}
+.room-plan__whole-room{min-width:230px;padding:10px 19px!important;display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;text-align:center;border-radius:10px;min-height:56px!important}
+.room-plan__whole-room .pin-name{font-size:13px}.room-plan__book-action{font-size:11px;font-weight:750;color:#185f47}
+.campus-room-section .policy-note{margin:14px 2px 2px;font-size:11px;line-height:1.7}
+.room-plan__whole-room.state-available{border-color:#68ac85;background:#f3f9ed}.room-plan__whole-room.state-occupied{border-color:#cf8579;background:#fff0e8}.room-plan__whole-room.state-soon{border-color:#d4ac5c;background:#fff6db}.room-plan__whole-room.state-closed{border-color:#a9b6b5;background:#f1f3f2}
+.resource-photo.photo-library-seats{background-image:url('library-seats.jpg')!important;background-size:cover!important;background-position:center center!important}
+.resource-photo.photo-library-pcs{background-image:url('library-pcs.jpg')!important;background-size:cover!important;background-position:center center!important}
+.resource-photo.photo-teaching-lab{background-image:url('teaching-lab.jpg')!important;background-size:cover!important;background-position:center center!important}
+.resource-photo.photo-group-study{background-image:url('group-study.jpg')!important;background-size:cover!important;background-position:center center!important}
+@media(max-width:1180px){.campus-hero{grid-template-columns:1fr .75fr}.campus-zones{gap:15px}.campus-unit .signal-pill{font-size:9px}}
+@media(max-width:900px){.campus-hero{grid-template-columns:1fr}.campus-hero__copy{padding:30px}.campus-hero__visual{min-height:230px}.campus-zones{grid-template-columns:1fr 1fr}.campus-zone-card__picture{height:180px}.campus-units{grid-template-columns:1fr}.room-plan__walls{padding:30px 18px 40px}.room-plan__workstations{gap:10px}}
+@media(max-width:690px){.campus-zones{grid-template-columns:1fr}.campus-zone-card__picture{height:220px}.campus-hero__copy h1{font-size:39px}.campus-section .section-heading{align-items:flex-start;flex-wrap:wrap}.room-plan__walls{padding:28px 10px 35px;border-width:5px}.room-plan__workstations{grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);gap:6px}.room-plan__aisle{font-size:8px}.room-seat{padding:8px 6px!important;min-height:102px!important;flex-direction:column;gap:4px;text-align:center}.room-seat__furniture{flex-basis:auto}.room-seat .pin-name{font-size:10px;white-space:normal}.room-seat .seat-state{font-size:9px;margin:0}.room-plan__group-table{width:min(75%,300px);height:140px}.room-plan__group-table i{width:34px;height:23px}.room-plan__group-table i:nth-child(5){left:-43px}.room-plan__group-table i:nth-child(6){right:-43px}.room-plan__topline,.room-plan__bottomline{font-size:8px}.campus-unit{padding:9px}.campus-unit__icon{width:37px;flex-basis:37px}.campus-unit .signal-pill{padding:5px}.campus-unit__arrow{display:none}}
+@media(prefers-reduced-motion:reduce){.campus-zone-card,.campus-zone-card img,.campus-unit{transition:none!important}}

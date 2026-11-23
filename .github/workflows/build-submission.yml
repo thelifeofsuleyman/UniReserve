@@ -2,7 +2,7 @@ name: Export and verify assessed PDF documents
 
 on:
   push:
-    branches: [improve/ui-and-booking-safety]
+    branches: [feature/space-first-catalogue]
     paths:
       - 'docs/**'
       - 'scripts/build_submission_docs.py'
@@ -32,7 +32,7 @@ jobs:
       - name: Validate all required submission artifacts
         run: python scripts/validate_submission.py
       - name: Publish PDF exports onto the final docs branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/improve/ui-and-booking-safety'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/space-first-catalogue'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
