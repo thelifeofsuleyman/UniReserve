@@ -1,0 +1,52 @@
+@startuml
+title UniReserve - Logical ERD (Third Normal Form)
+skinparam shadowing false
+hide circle
+entity "users" as User {
+  * id : INTEGER <<PK>>
+  --
+  * email : VARCHAR(255) <<UNIQUE>>
+  * password_hash : TEXT
+  * role : VARCHAR(10)
+  * is_active : BOOLEAN
+}
+entity "resources" as Resource {
+  * id : INTEGER <<PK>>
+  --
+  * public_code : VARCHAR(40) <<UNIQUE>>
+  * name : VARCHAR(120)
+  * category : VARCHAR(20)
+  * requires_approval : BOOLEAN
+  * is_enabled : BOOLEAN
+}
+entity "reservations" as Reservation {
+  * id : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * resource_id : INTEGER <<FK>>
+  * start_utc : TIMESTAMP
+  * end_utc : TIMESTAMP
+  * status : VARCHAR(30)
+  * created_utc : TIMESTAMP
+}
+entity "reservation_events" as ReservationEvent {
+  * id : INTEGER <<PK>>
+  --
+  * reservation_id : INTEGER <<FK>>
+  * actor_user_id : INTEGER <<FK>>
+  * action : VARCHAR(30)
+  previous_status : VARCHAR(30) <<NULL>>
+  * new_status : VARCHAR(30)
+  * occurred_utc : TIMESTAMP
+}
+User ||--o{ Reservation : "FK user_id"
+Resource ||--o{ Reservation : "FK resource_id"
+Reservation ||--o{ ReservationEvent : "FK reservation_id"
+User ||--o{ ReservationEvent : "FK actor_user_id"
+note bottom of Reservation
+  CHECK (start_utc < end_utc)
+  CHECK status in {PENDING_APPROVAL, CONFIRMED, REJECTED, CANCELLED}
+  One transaction must enforce confirmed non-overlap.
+  A UNIQUE index cannot enforce interval overlap.
+end note
+@enduml

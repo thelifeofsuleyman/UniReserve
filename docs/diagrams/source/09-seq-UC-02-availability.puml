@@ -1,0 +1,28 @@
+@startuml
+title UC-02 - Browse and check availability
+actor "Authenticated User" as U
+participant "ResourceRoutes" as R
+participant "ResourceService" as S
+database "ResourceRepository" as Repo
+database "ReservationRepository" as Bookings
+U -> R : browse catalogue
+R -> S : list_resources()
+S -> Repo : list_all()
+Repo --> S : resources
+S --> U : resource catalogue
+U -> R : check(resourceId, window)
+R -> S : check_availability(resourceId, window)
+alt invalid window / disabled resource
+  S --> U : validation/unavailable message
+else valid enabled resource
+  S -> Repo : get(resourceId)
+  Repo --> S : resource
+  S -> Bookings : find_confirmed_overlaps(resourceId, window)
+  Bookings --> S : confirmed matches
+  S --> U : free if no confirmed matches
+end
+note over U,S
+  This view does not hold capacity.
+  Confirmation must recheck the transactionally stored state.
+end note
+@enduml

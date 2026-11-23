@@ -1,0 +1,48 @@
+@startuml
+title UC-05 - Approve or reject restricted booking
+actor "Administrator" as A
+participant "AdminRoutes" as R
+participant "BookingService" as S
+participant "SQLiteUnitOfWork" as T
+database "ReservationRepository" as Repo
+database "ResourceRepository" as Resources
+A -> R : decide(pendingId, choice)
+R -> S : decide(admin, pendingId, choice)
+S -> S : require ADMIN role
+alt non-admin role
+  S --> A : forbidden; no mutation
+else authorized
+  S -> T : BEGIN IMMEDIATE
+  S -> Repo : get(pendingId)
+  Repo --> S : latest status and window
+  alt request not pending
+    S -> T : rollback()
+    S --> A : stale decision refused
+  else request still PENDING_APPROVAL
+    alt reject
+      S -> Repo : save(REJECTED)
+      S -> Repo : append rejection event
+      S -> T : commit()
+      S --> A : rejected
+    else approve
+      S -> Resources : get(resourceId)
+      Resources --> S : enabled status
+      S -> Repo : find_confirmed_overlaps(resourceId, window)
+      Repo --> S : conflicts
+      alt disabled or confirmed conflict exists
+        S -> T : rollback()
+        S --> A : cannot approve; remains pending
+      else enabled and no confirmed overlap
+        S -> Repo : save(CONFIRMED)
+        S -> Repo : append approval event
+        S -> T : commit()
+        S --> A : confirmed
+      end
+    end
+  end
+end
+note over S,T
+  Pending does not hold the slot.
+  Approval must recheck availability atomically.
+end note
+@enduml

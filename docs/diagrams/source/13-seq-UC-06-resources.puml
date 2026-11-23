@@ -1,0 +1,29 @@
+@startuml
+title UC-06 - Admin maintains catalogue
+actor "Administrator" as A
+participant "AdminRoutes" as R
+participant "ResourceService" as S
+participant "SQLiteUnitOfWork" as T
+database "ResourceRepository" as Repo
+A -> R : create/edit/disable(resource)
+R -> S : change_resource(user, data)
+S -> S : require ADMIN role
+alt non-admin actor
+  S --> A : forbidden; no changes
+else authorized actor
+  S -> S : check required fields, unique code
+  alt duplicate code or invalid input
+    S --> A : validation error
+  else valid change
+    S -> T : BEGIN IMMEDIATE
+    S -> Repo : save resource change
+    Repo --> S : saved
+    S -> T : commit()
+    S --> A : change confirmed
+  end
+end
+note over A,S
+  Disabling blocks NEW requests.
+  It does not silently cancel existing confirmed bookings.
+end note
+@enduml

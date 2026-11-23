@@ -1,0 +1,26 @@
+@startuml
+title UC-04 - View and cancel own reservation
+actor "Student / Staff" as U
+participant "BookingRoutes" as R
+participant "BookingService" as S
+participant "SQLiteUnitOfWork" as T
+database "ReservationRepository" as Repo
+U -> R : view my bookings
+R -> S : list_own(user)
+S -> Repo : list_by_owner(user.id)
+Repo --> U : own reservations only
+U -> R : cancel(reservationId)
+R -> S : cancel(user, reservationId, now)
+S -> T : BEGIN IMMEDIATE
+S -> Repo : get(reservationId)
+Repo --> S : latest reservation
+alt owner and status cancellable and before start
+  S -> Repo : save(CANCELLED)
+  S -> Repo : append audit event
+  S -> T : commit()
+  S --> U : cancellation confirmed
+else other owner / too late / terminal state
+  S -> T : rollback()
+  S --> U : denied; no changes
+end
+@enduml

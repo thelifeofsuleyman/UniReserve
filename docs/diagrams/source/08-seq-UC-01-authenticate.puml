@@ -1,0 +1,22 @@
+@startuml
+title UC-01 - Authenticate and log out
+actor "Student / Staff / Admin" as U
+participant "Flask AuthRoutes" as R
+participant "AuthService" as S
+database "UserRepository" as D
+participant "Session" as Sess
+U -> R : submit email + password
+R -> S : login(credentials)
+S -> D : find_by_email(email)
+D --> S : user or none
+alt valid account and password hash matches
+  S -> Sess : create session(role from server)
+  Sess --> U : authenticated catalogue
+else invalid credentials
+  S --> R : generic AuthenticationError
+  R --> U : generic sign-in failure
+end
+U -> R : logout
+R -> Sess : invalidate session
+Sess --> U : signed out
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+title UC-03 - Request resource reservation (including conflict)
+actor "Student / Staff" as U
+participant "BookingRoutes" as R
+participant "BookingService" as S
+participant "SQLiteUnitOfWork" as T
+database "ReservationRepository" as Repo
+database "ResourceRepository" as Resources
+U -> R : request(resourceId, window)
+R -> S : request_booking(user, resourceId, window)
+S -> S : validate role and BR-01/03/04
+alt invalid range or unauthorized
+  S --> U : reject; no data changes
+else valid input
+  S -> T : BEGIN IMMEDIATE
+  S -> Resources : get(resourceId)
+  Resources --> S : resource
+  S -> Repo : find_confirmed_overlaps(resourceId, window)
+  Repo --> S : confirmed conflicts
+  alt resource disabled or conflict exists
+    S -> T : rollback()
+    S --> U : no reservation; conflict explanation
+  else resource enabled and no confirmed overlap
+    alt requires approval
+      S -> Repo : save(PENDING_APPROVAL)
+    else ordinary resource
+      S -> Repo : save(CONFIRMED)
+    end
+    S -> Repo : append audit event in same transaction
+    S -> T : commit()
+    S --> U : new reservation ID and status
+  end
+end
+note over S,T
+  Do not trust a previous read-only availability result.
+  BEGIN IMMEDIATE serializes SQLite booking decisions.
+end note
+@enduml

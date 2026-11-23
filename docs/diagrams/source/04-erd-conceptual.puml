@@ -1,0 +1,36 @@
+@startuml
+title UniReserve - Conceptual ERD
+skinparam shadowing false
+hide circle
+entity "User" as User {
+  user identifier
+  email
+  role
+}
+entity "Resource" as Resource {
+  resource identifier
+  name
+  category
+  approval requirement
+  availability flag
+}
+entity "Reservation" as Reservation {
+  reservation identifier
+  time interval
+  status
+}
+entity "Reservation Event" as ReservationEvent {
+  event identifier
+  action
+  transition
+  timestamp
+}
+User ||--o{ Reservation : requests
+Resource ||--o{ Reservation : schedules
+Reservation ||--o{ ReservationEvent : records
+User ||--o{ ReservationEvent : performs
+note right of Reservation
+  Exactly one user and one resource per reservation.
+  Confirmed intervals must not overlap per resource.
+end note
+@enduml

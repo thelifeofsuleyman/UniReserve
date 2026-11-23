@@ -1,0 +1,24 @@
+@startuml
+title UniReserve - Reservation State Machine
+skinparam shadowing false
+state "Pending Approval" as PENDING_APPROVAL
+state "Confirmed" as CONFIRMED
+state "Rejected" as REJECTED
+state "Cancelled" as CANCELLED
+[*] --> PENDING_APPROVAL : request restricted resource\n[valid interval and no conflict]
+[*] --> CONFIRMED : request normal resource\n[valid interval; no confirmed conflict]
+PENDING_APPROVAL --> CONFIRMED : admin approves\n[enabled; availability rechecked atomically]
+PENDING_APPROVAL --> REJECTED : admin rejects
+PENDING_APPROVAL --> CANCELLED : owner cancels [before start]
+CONFIRMED --> CANCELLED : owner cancels [before start]
+REJECTED --> [*]
+CANCELLED --> [*]
+note right of PENDING_APPROVAL
+  Non-capacity-blocking.
+  Multiple pending requests can overlap.
+end note
+note right of CONFIRMED
+  Blocks overlapping confirmations,
+  even if an earlier availability check said free.
+end note
+@enduml
