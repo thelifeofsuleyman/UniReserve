@@ -5,7 +5,7 @@ Actor identity and role are always resolved from a server-signed session and DB.
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 import hmac
 import os
@@ -371,6 +371,24 @@ def create_app(test_config: dict | None = None) -> Flask:
                                spaces=spaces, space_count=len(spaces),
                                area_cards=area_cards, area_images=area_images)
 
+    @app.get("/api/resources/<int:resource_id>/calendar")
+    @login_required
+    def resource_calendar(resource_id: int):
+        """Availability windows for a date, without reservation owner data."""
+        raw = request.args.get("date", "").strip()
+        try:
+            day = date.fromisoformat(raw)
+            if raw != day.isoformat():
+                raise ValueError("Date is not ISO formatted")
+            payload = service.calendar_day(actor_id(), resource_id, day)
+        except MissingRecord:
+            abort(404)
+        except AccessDenied:
+            abort(403)
+        except (InvalidRequest, ValueError):
+            return jsonify({"error": "Choose a date within the next 14 days."}), 400
+        return jsonify(payload)
+
     @app.get("/resources/<int:resource_id>")
     @login_required
     def resource_detail(resource_id: int):
@@ -393,9 +411,15 @@ def create_app(test_config: dict | None = None) -> Flask:
         except ValueError:
             chosen_start, chosen_end = suggested_start, suggested_end
         statuses = service.status_overview(actor_id())
+        local_today = datetime.now(display_zone)
+        calendar_min = local_today.date().isoformat()
+        calendar_max = (local_today + timedelta(days=14)).date().isoformat()
+        calendar_date = chosen_start[:10] if calendar_min <= chosen_start[:10] <= calendar_max else calendar_min
         return render_template("resource_detail.html", page_title=resource.name,
                                resource=resource, current_status=statuses[resource.id],
-                               start=chosen_start, end=chosen_end, space=space)
+                               start=chosen_start, end=chosen_end, space=space,
+                               calendar_min=calendar_min, calendar_max=calendar_max,
+                               calendar_date=calendar_date)
 
     def resume_booking_url(resource_id: int) -> str:
         return url_for("resource_detail", resource_id=resource_id,
