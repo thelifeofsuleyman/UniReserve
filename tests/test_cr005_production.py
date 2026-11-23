@@ -57,6 +57,23 @@ class ProductionConfigTests(unittest.TestCase):
             finally:
                 app.extensions["unireserve_engine"].dispose()
 
+    def test_production_app_can_start_without_sample_catalogue(self):
+        with patch.dict(os.environ, {
+            "UNIRESERVE_MODE":"production", "UNIRESERVE_SECRET_KEY":"b" * 64,
+            "UNIRESERVE_TRUSTED_HOSTS":"reservations.example.edu",
+        }, clear=True):
+            app=create_app({"DB_PATH":self.db})
+            try:
+                self.assertEqual(app.test_client().get("/healthz",
+                    base_url="https://reservations.example.edu").status_code,200)
+                from sqlalchemy.orm import Session
+                from sqlalchemy import select
+                from unireserve.storage.models import Space
+                with Session(app.extensions["unireserve_engine"]) as db:
+                    self.assertEqual(db.scalars(select(Space)).all(),[])
+            finally:
+                app.extensions["unireserve_engine"].dispose()
+
     def test_main_pages_drop_development_language(self):
         with patch.dict(os.environ, {"UNIRESERVE_MODE":"local"}, clear=True):
             app=create_app({"DB_PATH":self.db})

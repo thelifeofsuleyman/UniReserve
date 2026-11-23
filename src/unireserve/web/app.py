@@ -495,6 +495,24 @@ def create_app(test_config: dict | None = None) -> Flask:
             return resolve_error(exc, url_for("admin"))
         return redirect(url_for("admin"))
 
+    @app.post("/admin/spaces")
+    @admin_required
+    def admin_create_space():
+        try:
+            service.create_space(
+                actor_id(),
+                request.form.get("code", ""),
+                request.form.get("name", ""),
+                request.form.get("kind", ""),
+                request.form.get("opens_at", ""),
+                request.form.get("closes_at", ""),
+                request.form.get("open_days", ""),
+            )
+            flash("Space created.", "success")
+        except BookingError as exc:
+            return resolve_error(exc, url_for("admin"))
+        return redirect(url_for("admin"))
+
     @app.post("/admin/spaces/<int:space_id>/closures")
     @admin_required
     def admin_add_closure(space_id: int):
