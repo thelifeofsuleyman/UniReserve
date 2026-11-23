@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#101b35">
   <title>{{ page_title }} · UniReserve</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='refined.css') }}">
 </head>
 <body class="{{ 'auth-page' if not g.user else 'dashboard-page' }}">
 {% if g.user %}
@@ -24,7 +25,7 @@
     <div class="user-panel"><div class="avatar" aria-hidden="true">{{ g.user.email[:1]|upper }}</div><div class="user-label"><strong>{{ g.user.email.split('@')[0] }}</strong><span>{{ g.user.role|title }} account</span></div><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sign out" title="Sign out">↪</button></form></div>
   </aside>
   <main class="main-area">
-    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">Resource operations</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill">◷ {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
+    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">AzTU · Example campus</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill"><span aria-hidden="true">◷</span> Local time · {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
     <div class="content-wrap">
 {% else %}
 <div class="auth-wrap">
@@ -34,7 +35,7 @@
       {% endwith %}
       {% block content %}{% endblock %}
 {% if g.user %}
-      <footer class="page-footer">UniReserve <span>·</span> AzTU-inspired study booking demo <span>·</span> Student project demo</footer>
+      <footer class="page-footer"><strong>UniReserve</strong><span>·</span> Campus study-space prototype <span>·</span> Spaces and schedules are illustrative; check current university rules before relying on them.</footer>
     </div>
   </main>
 </div>
