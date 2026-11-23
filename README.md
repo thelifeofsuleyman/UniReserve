@@ -24,7 +24,7 @@ Open **http://127.0.0.1:5000** in a browser. Leave the terminal open while using
 
 **Save the demo login credentials shown by `seed_demo.py`.** Three randomized accounts are created (`student@unireserve.test`, `staff@unireserve.test` and `admin@unireserve.test`). Their passwords are printed **once**, never checked into Git. The student/staff accounts can book; the admin account can review pending requests and manage resources. The script also creates six sample rooms/equipment items. Running it twice on the same database does not reset existing accounts.
 
-> PowerShell execution-policy error when activating? You can skip activation and use `\.venv\Scripts\python.exe` instead of `python` for every command, including install/seed/start. Alternatively, in the current terminal run `Set-ExecutionPolicy -Scope Process Bypass`, then activate again.
+> PowerShell execution-policy error when activating? You can skip activation and use `.\.venv\Scripts\python.exe` instead of `python` for every command, including install/seed/start. Alternatively, in the current terminal run `Set-ExecutionPolicy -Scope Process Bypass`, then activate again.
 
 ### Start on macOS / Linux
 
