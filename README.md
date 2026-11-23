@@ -4,7 +4,7 @@ A small, locally runnable **University Equipment and Room Reservation System** d
 
 **Student:** Suleyman Shafizada · **Group:** m666i1  
 **Submission deadline:** 2 December 2026  
-**Status:** Milestone 5 — working local web UI backed by a tested SQLite/SQLAlchemy reservation engine; final coursework test/report/traceability packages still in progress.
+**Status:** Milestone 8 submission package prepared — working local Flask application, visual 2D availability Studio, requirements/diagrams, 85 verified tests, traceability, and six PDF exports. Personal reflection review and real usability evaluation remain open.
 
 ## Start the web UI (Windows 10/11)
 
@@ -14,7 +14,7 @@ Install **Python 3.11 or later** and Git. Open **PowerShell** (or VS Code Termin
 git clone https://github.com/thelifeofsuleyman/UniReserve.git
 cd UniReserve
 py -m venv .venv
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-dev.txt
 python scripts/seed_demo.py
 python scripts/run_web.py
@@ -62,7 +62,8 @@ Run both seed and web commands against the same DB path. On macOS/Linux use `exp
 2. **Student**: choose a camera that requires approval, submit a pending request, and inspect the pending status.
 3. **Admin**: sign out, sign in as admin, review/approve/reject the pending camera request, add a new resource, or disable one.
 4. **Student**: sign back in to verify the approval state and audit history.
-5. **Double booking**: attempt a second booking for the same room and time using another user; the engine must reject the conflict.
+5. **2D Availability Studio**: open **Availability studio** in the sidebar to inspect the illustrative resource map. Green = available, yellow = confirmed booking within 15 minutes, red = current confirmation, gray = disabled. The status API refreshes every 30 seconds; positions are not surveyed and colors do not come from physical sensors.
+6. **Double booking**: attempt a second booking for the same room and time using another user; the engine must reject the conflict.
 
 All booking times in the web UI are explicitly interpreted in **Asia/Baku** by default. Times are stored as UTC in SQLite and shown back in the configured display timezone. The app only runs on the local machine by default (`127.0.0.1`).
 
@@ -71,11 +72,13 @@ All booking times in the web UI are explicitly interpreted in **Asia/Baku** by d
 ```powershell
 python scripts/run_tests.py
 python scripts/validate_models.py
+python scripts/validate_traceability.py
+python scripts/measure_latency.py
 coverage run --source=src/unireserve scripts/run_tests.py
 coverage report -m --fail-under=80
 ```
 
-The test suite includes Python domain/unit tests, SQLite transaction/integration tests, 50 repeated concurrent-booking race trials, and Flask HTTP integration tests for sessions, CSRF, admin/ownership controls, and major UI flows. GitHub Actions runs the same test command and reports coverage. Run results are available in the repository's **Actions** tab. Milestone-specific testing notes are in [`docs/testing/M5_WEB_TEST_REPORT.md`](docs/testing/M5_WEB_TEST_REPORT.md).
+The test suite includes Python domain/unit tests, SQLite transaction/integration tests, 50 repeated concurrent-booking race trials, and Flask HTTP integration tests for sessions, CSRF, admin/ownership controls, and major UI flows. GitHub Actions runs the same test command and reports coverage. Run results are available in the repository's **Actions** tab. The [formal test plan and case catalogue](docs/testing/TEST_PLAN.md), [measured QA report](docs/testing/M6_TEST_REPORT.md) and [defect log](docs/testing/DEFECT_LOG.md) document the executed and unmeasured checks.
 
 ## Architecture and documentation
 
@@ -83,7 +86,10 @@ The test suite includes Python domain/unit tests, SQLite transaction/integration
 - **UML, ERDs and sequence diagrams:** [`docs/diagrams/`](docs/diagrams/)
 - **Database and service decision records:** [`docs/architecture/`](docs/architecture/)
 - **UI/user-feedback and manual trial instructions:** [`docs/ui/M5_UI_GUIDE.md`](docs/ui/M5_UI_GUIDE.md)
-- **AI and change-management evidence:** to be consolidated in the final reflection and traceability milestone.
+- **Traceability:** [all Must requirements mapped to code and tests](docs/traceability/MATRIX.md)
+- **Change request and feedback:** [CR-001](docs/change-management/CR-001-visual-availability.md), [user feedback log](docs/ui/UI_FEEDBACK_LOG.md)
+- **Reflection and process review:** [reflection draft](docs/reflection/REFLECTION_DRAFT.md), [self-review](docs/process/SELF_REVIEW_CHECKLIST.md)
+- **PDF submission package:** [six PDFs](docs/submission/README.md)
 
 The project is a **Flask modular monolith**. The browser calls Flask routes, which derive the actor identity from the signed session and call the tested booking service. That service handles UTC interval rules, resource access, approvals, and transaction-safe changes using SQLite's `BEGIN IMMEDIATE`. Audit events use database triggers to prevent modification/deletion. The template layer never directly takes a user ID from submitted forms.
 
