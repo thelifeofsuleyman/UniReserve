@@ -1,86 +1,87 @@
 # UniReserve
 
-**AzTU-inspired University Study-Space Reservation System**  
-**Student:** Suleyman Shafizada · **Group:** m666i1  
-**Software Engineering individual project · Deadline: 2 December 2026**
+**Campus study-space reservations**  
+**Student:** Suleyman Shafizada · Group m666i1  
+**Software Engineering project · Deadline: 2 December 2026**
 
-**Status:** Working local coursework prototype. All eight planned development milestones are merged. The current demonstration has four illustrative study areas, an interactive 2D seat map, a transactional booking engine, automated tests and six assessed PDF documents. See [Final Readiness Audit](docs/testing/FINAL_HANDOFF_AUDIT.md).
+UniReserve lets students reserve individual library seats, desktop computers and study rooms. Administrators manage booking approvals, opening hours, closures, room inventory and account access. The interface includes interactive room plans and continuously updated reservation-status indicators.
 
-## What can be reserved?
+## Start on Windows / VS Code
 
-- **Library reading area:** eight individually identified study desks.
-- **Library computer area:** six individually identified desktop PCs.
-- **Teaching computer lab:** eight individually identified PCs; approval required for demo bookings.
-- **Group study room:** one bookable room; six chairs on the diagram are decorative, not six separate bookings.
-
-Photos and floor plans are original **illustrations**, not authenticated photographs or surveyed layouts of AzTU rooms. Opening times, exact seat counts, lab access and the one-overlapping-study-place-per-user restriction are **coursework demonstration policies**, not official AzTU commitments.
-
-A green badge means free according to confirmed reservations **at the current status-check time**. Yellow means an accepted booking begins within 15 minutes; red means a confirmed booking is active; gray marks disabled inventory. Closed-hours status is also indicated separately. This is **not** physical occupancy sensing. Booking/approval always rechecks current data transactionally.
-
-## Quick start for an existing Windows clone
-
-Open VS Code's PowerShell terminal **inside the cloned UniReserve folder**:
+From an existing clone of this repository:
 
 ```powershell
 git pull origin main
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe scripts/run_web.py
+.\.venv\Scripts\python.exe scripts/serve_local.py
 ```
 
-Open **http://127.0.0.1:5000**. Keep the terminal open; use **Ctrl+C** to stop the server.
+Open **http://127.0.0.1:5000** and press Ctrl+C to stop. The local server uses **Waitress**, not Flask's development server. The first local launch initializes the four sample study areas only if the database has no areas. Existing accounts, reservations, approval events and space edits are retained.
 
-The local launcher performs a one-time, idempotent demonstration-area sync when there are no Space records. Existing accounts, bookings and audit history are preserved, and six named obsolete starter items are archived instead of deleted. The default database is `instance/unireserve.sqlite3`; **back it up before any manual migrations**. If you intentionally maintain your own custom catalogue, set `UNIRESERVE_AUTO_SAMPLE_CATALOG=0` before starting.
-
-## First-time Windows setup
-
-Install **Python 3.11+** with its virtual-environment and pip support. If `py` is missing or `python` resolves to MSYS2, use the explicit standard Windows Python executable instead of MSYS2.
+For first-time setup:
 
 ```powershell
-git clone https://github.com/thelifeofsuleyman/UniReserve.git
-cd UniReserve
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python.exe scripts/seed_demo.py
-.\.venv\Scripts\python.exe scripts/run_web.py
+.\.venv\Scripts\python.exe scripts/serve_local.py
 ```
 
-Save the three randomized passwords printed by `seed_demo.py`. Accounts are `student@unireserve.test`, `staff@unireserve.test` and `admin@unireserve.test`. **Do not publish passwords, databases or .env secrets.** Running `seed_demo.py` against an already initialized demo does not reset existing passwords. See `scripts/sync_aztu_demo.py` for manual AzTU-style catalogue synchronization.
+`seed_demo.py` creates synthetic accounts with random passwords displayed once in the terminal. **Do not use these accounts for a public site.** The default SQLite file is `instance/unireserve.sqlite3`, which Git ignores.
 
-**macOS/Linux:** use `python3 -m venv .venv`, `source .venv/bin/activate`, then `python -m pip install -r requirements-dev.txt`, `python scripts/seed_demo.py` (first time only), `python scripts/run_web.py`.
+## Initialize an actual instance without sample users
 
-## Manual workflow to review
+1. Install dependencies and configure `UNIRESERVE_DB_PATH` to a persistent location.
+2. Create a real administrator account, with a password entered privately:
 
-1. Sign in as a student. Browse the **four zone cards** and open a chosen room's **2D seat map**.
-2. Reserve one library desk/PC during its configured future opening hours. Verify the confirmation and **My Reservations** view.
-3. Try an overlapping second seat for the same student and a booking during closed hours; both should be rejected without creating an extra confirmed reservation.
-4. Submit a teaching-lab or group-room request requiring approval. Sign in as admin and approve/reject it.
-5. As admin, review the catalogue, change area hours and add a teaching/maintenance closure. Existing confirmed reservations must not be silently invalidated.
-6. Check cancellation before a booking begins and verify its audit history.
+```powershell
+.\.venv\Scripts\python.exe scripts/create_account.py --email admin@your-university.edu --role ADMIN
+```
 
-If the local database was created by an earlier version and the seat map is empty, restart the current local launcher or run `.\.venv\Scripts\python.exe scripts/sync_aztu_demo.py` once. Never discard your SQLite database merely to refresh the demo.
+3. Log in to **Administration → Add an area** and configure the real room name, type and working hours. Use **Add a resource** to create each bookable seat or PC.
+4. Provision other accounts using `scripts/create_account.py --email ADDRESS --role STUDENT` or `STAFF`.
+5. Confirm the real institution's access, scheduling and privacy policies before going public.
 
-## Automated verification
+## Managed HTTPS deployment baseline
+
+The production WSGI launcher is `scripts/serve_production.py`, which binds Waitress to **127.0.0.1:8080** and requires a separate **HTTPS reverse proxy**. It does not deploy a publicly reachable site or issue certificates.
+
+Configure these settings through your host's service/secret manager (not in Git):
+
+```text
+UNIRESERVE_MODE=production
+UNIRESERVE_SECRET_KEY=<secure-persistent-random-secret>
+UNIRESERVE_TRUSTED_HOSTS=reservations.your-university.edu
+UNIRESERVE_DB_PATH=instance/unireserve.sqlite3
+UNIRESERVE_AUTO_SAMPLE_CATALOG=0
+UNIRESERVE_PROXY_COUNT=1
+```
+
+Use `UNIRESERVE_PROXY_COUNT=1` **only** behind exactly one trusted proxy that replaces client-supplied forwarded headers. Production mode requires a secret of at least 32 characters, allowed hosts, HTTPS-only session cookies and prevents sample seeding. CSP, HSTS, anti-framing, no-sniff, and referrer headers are applied. See [Operations and Deployment](docs/deployment/OPERATIONS.md) for the architecture, account provisioning, backups and remaining release gates.
+
+**Important:** A production-styled interface and WSGI configuration are not the same as public deployment or production accreditation. An institution-hosted service still needs domain/TLS ownership, account recovery/SSO, rate limiting, audited backups, monitoring, security testing and real campus authorization.
+
+## Run validation
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/run_tests.py
 .\.venv\Scripts\python.exe scripts/validate_models.py
 .\.venv\Scripts\python.exe scripts/validate_traceability.py
 .\.venv\Scripts\python.exe -m coverage run --source=src/unireserve scripts/run_tests.py
-.\.venv\Scripts\python.exe -m coverage report -m --fail-under=80
+.\.venv\Scripts\python.exe -m coverage report --fail-under=80
 ```
 
-**Verified on GitHub Actions at commit `d8dad20a`:** 123 automated tests passed, 94% package-wide statement coverage, and a synthetic 200-request performance check passed (p95 ≈ 0.023 seconds). [View run 45110603568](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45110603568). These results describe the tested CI setup, **not** a local Windows usability session or production deployment.
+GitHub Actions checks the booking engine, parallel request races, approval states, user permissions, opening-hour rules, web views, requirement/design mapping and synthetic HTTP latency. See the [current Actions runs](https://github.com/thelifeofsuleyman/UniReserve/actions) rather than assuming historic coverage numbers apply to every later commit.
 
-## Documentation and handoff
+## Documentation
 
-- [Requirements, use cases, existing-system comparison](docs/requirements/)
-- [Architecture, UML and conceptual/logical ERDs](docs/diagrams/)
-- [Test plan, reports, defect log and final audit](docs/testing/)
-- [Requirement-to-use-case/design/code/test traceability](docs/traceability/)
-- [Change-management evidence (CR-001–CR-004)](docs/change-management/)
-- [Process evidence, issues and self-review](docs/process/)
-- [Six assessed PDF exports](docs/submission/)
-- [Individual reflection — draft requiring personal review](docs/reflection/REFLECTION_DRAFT.md)
-- [KOICA submission handoff](docs/submission/KOICA_HANDOFF.md)
+- [Requirements and use cases](docs/requirements/)
+- [UML, ERDs and architecture](docs/diagrams/)
+- [Test plan and results](docs/testing/)
+- [Traceability](docs/traceability/)
+- [Changes CR-001–CR-005](docs/change-management/)
+- [Deployment](docs/deployment/OPERATIONS.md)
+- [Six assessed PDFs](docs/submission/)
+- [AI-assisted individual reflection draft](docs/reflection/REFLECTION_DRAFT.md)
 
-This is a **locally run Flask/SQLAlchemy/SQLite prototype**, not a public multi-user university service. There is no university SSO, physical occupancy sensing, production rate limiting, TLS termination or verified campus room survey. Students must review their own reflection and disclose AI use. The repository is **private**; a lecturer needs GitHub access to view it.
+Actual AzTU reservation rights, precise room geometry, booking schedules and real-time physical occupancy **have not been verified**. These facts and original AI image-generation assistance are documented in the academic materials and on the site's dedicated **Service information** page instead of repeated across every booking screen. The project is not an official AzTU service.

@@ -159,3 +159,8 @@ The original baseline scope included equipment lending. A user-requested change 
 ## CR-003: user-level fairness and visual review
 
 Actual owner feedback reported that the previous UI felt visually generic. The new UI uses original offline illustrative images, stronger hierarchy, a filterable 2D map, and synchronizes color+text status indicators. The proposed fair-use rule extends BR-05 and FR-005 without renumbering the requirements. The system also prevents an administrator edit from silently invalidating future confirmed reservations. See `docs/change-management/CR-003-ux-and-integrity.md`. Real AzTU seat assignment and the one-simultaneous-booking policy remain **unverified demonstration assumptions**.
+
+
+## CR-005 — Product presentation and production-mode controls
+
+The owner's feedback prompted a less intrusive user interface: booking screens no longer display internal project/setup reminders, while the distinct `/about` page preserves factual information about configured room data and non-sensor availability. FR-001/010 and NFR-003/004 now have a production configuration baseline: stable secret, explicit trusted hosts, Secure session cookies and security headers. FR-009 extends to authorized creation of Spaces, not only inventory inside pre-created areas. No original requirement IDs were renumbered and the existing booking transaction/status rules were not weakened. See CR-005, its QA and traceability addenda, and `docs/deployment/OPERATIONS.md`. A documented hosting path is not proof of an officially approved public university deployment.
