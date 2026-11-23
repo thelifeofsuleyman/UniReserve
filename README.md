@@ -118,3 +118,8 @@ Or run `python scripts/seed_demo.py` again; if demo users exist, it **does not c
 The 2D map displays individually bookable Library Reading Seats, Library PCs, Teaching Lab PC workstations, and a sample study room. The seeded units and floor arrangement are **illustrations**; there is no university API, student-card verification or physical presence sensor. **CLOSED** shows after hours / school closures; green/yellow/red convey confirmed reservations only. An administrator can update example opening times and create teaching/maintenance closures without invalidating confirmed bookings. Existing admin/student passwords remain unchanged.
 
 **References:** https://aztu.edu.az/az/page/kampus-202 · https://aztu.edu.az/az/idareetme/ofis-ve-merkezler/kitabxana-informasiya-merkezi · https://aztu.edu.az/az/elaqe
+
+
+### CR-003 — UI refinements and fair-use review
+
+After pulling the latest `main`, restart Flask (no re-seeding or schema migration needed). The updated local-image-based UI includes zone filters on the 2D map and availability badges whose color and text update together. **Status colors show global current booking status, not ownership or future guaranteed availability.** In the demo only, a user may hold at most one overlapping confirmed seat/PC/room. Different users may book distinct spots at the same time, pending approval still does not reserve the unit, and administrators cannot move confirmed future bookings to incompatible hours. See `docs/change-management/CR-003-ux-and-integrity.md` for decisions and known gaps.
