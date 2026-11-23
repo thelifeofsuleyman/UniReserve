@@ -1,32 +1,33 @@
-# UniReserve — Issue Board and Milestone Progress
+# UniReserve — Project Board (Final Handoff)
 
-**Date:** 23 November 2026 | **Project:** SWE individual coursework | **Submission target:** 2 December 2026
+**Project:** Software Engineering individual assignment · **Deadline:** 2 December 2026  
+Completed items reflect actual merged PRs, not invented task-board activity.
 
-This is a concise retrospective record of actual work and remaining gaps. GitHub PRs and CI runs are source evidence. Tasks were not invented as evidence of earlier activity.
+## Engineering milestones completed
+- [x] M1 — Initialize repository and starter tests.
+- [x] M2 — Requirements baseline, six use cases and product comparison — PR #1.
+- [x] M3 — UML, conceptual/logical ERD and architecture diagrams — PR #2.
+- [x] M4 — Transactional SQLite/SQLAlchemy booking engine — PR #3.
+- [x] M5 — Flask authentication, catalogue, bookings, approvals and admin UI — PR #4.
+- [x] M5.5 — First visual Studio/map iteration — PR #5, CR-001.
+- [x] M6 — Formal testing techniques, 36 identified cases, coverage/latency and defect evidence — PR #6.
+- [x] M7 — Traceability of all 11 Must requirements and documented design deviations — PR #7.
+- [x] M8 — Submission PDFs, process record, reflection draft and validation — PR #8.
+- [x] CR-002 — AzTU-inspired library seats, lab PCs, schedules and area closures — PR #9.
+- [x] CR-003 — Cohesive UI, simultaneous-seat fairness and safer admin edits — PR #10.
+- [x] CR-004 — Correct room-specific images, four logical maps, automatic local sample setup — PR #11.
+- [x] Final technical audit — latest CI confirms 123 tests/94% coverage; reference `docs/testing/FINAL_HANDOFF_AUDIT.md`.
 
-## Completed and supported by Git history
+## Honest outstanding tasks
+- [ ] Owner runs and personally evaluates current build on Windows (including keyboard/mobile behavior).
+- [ ] Owner reviews, edits and approves `docs/reflection/REFLECTION_DRAFT.md`.
+- [ ] Instructor access granted to the private GitHub repository.
+- [ ] Owner submits GitHub link through KOICA and retains submission confirmation.
 
-- [x] M1 — Initialize private repository, source layout, test runner and initial booking boundary tests.
-- [x] M2 — Requirements baseline: SRS, 18 functional / 8 NFR, six use cases and LibCal/Skedda research — PR #1.
-- [x] M3 — Domain, use case, ERD, state, design class, architecture and six sequence diagrams, plus exported images — PR #2.
-- [x] M4 — SQLite/SQLAlchemy domain service; transaction-safe booking, approvals, permissions and audit; race tests — PR #3.
-- [x] M5 — Flask web UI, login/logout, booking/catalogue/admin routes, CSRF and HTTP tests — PR #4.
-- [x] M5.5 — Owner-driven UI redesign, resource artwork, 2D interactive map, 15-minute status semantics, acceptance tests — PR #5 / CR-001.
-- [x] M6 — Formal test plan, 36 executed case references, coverage, defect log and NFR-001 latency probe — PR #6.
-- [x] M7 — Traceability of all 11 Must requirements, documented code/design deviations, supplementary CR-001 sequence — PR #7; model and traceability CI passed.
+## Deferred / not represented as completed
+- [ ] NFR-006 five-volunteer usability study (not measured).
+- [ ] NFR-007 manual keyboard-only walkthrough (not completed).
+- [ ] Real AzTU room IDs, physical layouts, holiday schedule and official booking rights (not verified).
+- [ ] Payment, equipment returns, priority scheduling, campus SSO and production hardening (outside assessed v1 scope).
 
-## Remaining / intentionally open
-
-- [ ] M8 — Export and verify required PDF deliverables, complete self-review checklist and reflection draft, confirm KOICA repository URL.
-- [ ] Owner review of **revised UI** and any subsequent feedback (has not occurred yet).
-- [ ] Optional NFR-006 5-volunteer usability study (not measured).
-- [ ] Optional NFR-007 keyboard-only walkthrough (not measured).
-- [ ] Should-scope physical checkout/return and quota limits (deferred by SRS).
-
-## Working process
-
-The original setup used multiple small file commits. Later milestones are developed on separate branches, checked by GitHub Actions, and **squash merged** into `main` as single meaningful milestones. No commit history was artificially backdated. Requirements, diagrams, source modules and tests are reconciled through code and document checks.
-
-## Real user-requested change
-
-The owner expressed dissatisfaction with the original visual UI and asked for 2D/3D placement and green/yellow/red availability. That feedback is preserved in `docs/ui/UI_FEEDBACK_LOG.md`. CR-001 records the impact, alternatives, and acceptance checks. The 2D UI is demonstrative and intentionally does not pretend to know real physical campus coordinates.
+Repository: https://github.com/thelifeofsuleyman/UniReserve
