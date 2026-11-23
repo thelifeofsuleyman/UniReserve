@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Test artifacts
+.coverage
+htmlcov/
+coverage.xml
+
+# Runtime configuration and data
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+instance/
+
+# Editors / operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
