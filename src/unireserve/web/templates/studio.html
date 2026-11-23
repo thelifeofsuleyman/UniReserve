@@ -8,7 +8,7 @@
 <section class="aztu-zone-wrap" data-zone-id="{{ group.space.id }}">
   <div class="zone-head"><div><span class="eyebrow">AREA {{ '%02d'|format(loop.index) }} / {{ group.space.kind|replace('_', ' ') }}</span><h2>{{ group.space.name }}</h2><p>{{ group.count }} individually reservable {{ 'units' if group.count != 1 else 'unit' }} · {{ group.space.opens_at }}–{{ group.space.closes_at }} (open weekdays: {{ group.space.open_days }}) · Asia/Baku</p></div><span class="zone-hours">{{ 'Approval needed' if group.space.kind == 'COMPUTER_LAB' else 'Advance booking' }}</span></div>
   <div class="aztu-floor" role="group" aria-label="Demonstration seat layout for {{ group.space.name }}">
-    <div class="aztu-floor-top"><span class="floor-drawing-note">01 / ILLUSTRATIVE FLOOR PLAN — NOT TO SCALE</span><span>WINDOW / DAYLIGHT ZONE</span></div>
+    <div class="aztu-floor-top"><span class="floor-drawing-note">01 / EXAMPLE LAYOUT — NOT TO SCALE</span><span>WINDOW / DAYLIGHT ZONE</span></div>
     <div class="aztu-floor-grid"><span class="floor-zone-label" aria-hidden="true">STUDY ZONE</span>
     {% for point in group.points %}{% set r=point.resource %}{% set status=point.status %}
       <a class="aztu-seat state-{{ status.state|lower }}" href="{{ url_for('resource_detail', resource_id=r.id) }}" data-resource-id="{{ r.id }}" data-state="{{ status.state }}" aria-label="{{ r.name }}: {{ status.state|lower }}">
