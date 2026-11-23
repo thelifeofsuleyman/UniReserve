@@ -1,0 +1,41 @@
+@startuml
+title CR-002 - Request or approve a particular seat during opening hours
+actor "Student" as U
+actor "Administrator" as A
+participant "Flask UI" as UI
+participant "BookingService" as S
+participant "SQLite UnitOfWork" as Tx
+database "Resource + Space + Closure" as DB
+database "Reservation + Event" as Book
+U -> UI : choose Library PC 04 + local time interval
+UI -> S : request(student, resource_id, interval)
+S -> Tx : BEGIN IMMEDIATE
+S -> DB : load unit, area hours, weekday mask, closures
+alt Closed day, outside hours, or class closure
+  S -> Tx : rollback()
+  S --> UI : reject; explain schedule policy
+else Open, listed, allowed and no confirmed overlap
+  S -> Book : recheck confirmed overlap of THIS unit
+  alt Overlapping confirmation
+    S -> Tx : rollback()
+    S --> UI : conflict (other seats remain available)
+  else Slot free
+    S -> Book : insert CONFIRMED or PENDING_APPROVAL + audit
+    S -> Tx : commit()
+    S --> UI : reservation ID and status
+  end
+end
+A -> UI : approve a pending teaching-lab PC
+UI -> S : decide(admin, pending_id, approve)
+S -> Tx : BEGIN IMMEDIATE
+S -> DB : recheck zone hours, class closure, enabled
+S -> Book : recheck confirmed overlap for exact PC
+alt Any policy / conflict fails
+  S -> Tx : rollback()
+  S --> UI : remain pending; no audit event
+else Valid
+  S -> Book : update CONFIRMED + event
+  S -> Tx : commit()
+  S --> UI : confirmed
+end
+@enduml

@@ -15,3 +15,5 @@ Feedback source: direct comments by the project owner in the ChatGPT development
 
 ## Follow-up for the actual owner
 Try the Studio, resource catalogue and mobile layout. Record whether labels and colors are clear and whether the plan should use real room/floor labels. Any accepted changes should have an updated CR, tests and screenshots.
+
+| UX-003 | 2026-11-23 | Owner asked to model AzTU computer labs, library PCs and separately bookable seats, respect working hours, and remove unrelated rental equipment. | CR-002 | Implemented; owner visual acceptance pending | AzTU-themed catalogue, individual-seat Studio, schedule and migration tests |

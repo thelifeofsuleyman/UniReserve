@@ -150,3 +150,7 @@ Log each genuine change request with ID, reason, impact on requirement IDs, diag
 - Skedda approvals: https://support.skedda.com/en/articles/11774950-booking-requests-approvals
 
 Official product pages consulted 23 November 2026.
+
+## CR-002 — University PC and seat-booking extension (23 Nov 2026)
+
+The original baseline scope included equipment lending. A user-requested change refocuses the demonstrator on **library study seats, library PCs and teaching-lab workstations**. For new demonstration areas, each seat/PC is an individually reservable Resource belonging to a Space; no student can book an entire PC laboratory merely by requesting one workstation. Reservations must fit the area's configurable local operating hours and weekdays, cannot overlap an administrator closure, and still obey FR-005 concurrency protection. Hidden legacy demo equipment is not bookable, but historical records remain. Detailed new rules AZ-01 through AZ-06, sourced facts vs illustrative campus assumptions, tests and impact are maintained in `docs/change-management/CR-002-aztu-seat-reservations.md`. Library hours 09:00–17:30 are publicly referenced by AzTU; assigned demo weekdays, room identities and PC quantities are *not* verified AzTU facts. The original FR IDs and Must acceptance criteria remain traceable, while this extension refines their policy and catalogue acceptance conditions.

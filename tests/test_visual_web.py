@@ -44,10 +44,10 @@ class VisualStudioIntegrationTests(unittest.TestCase):
         self.login()
         page=self.client.get('/studio')
         self.assertEqual(page.status_code,200)
-        self.assertIn(b'Cinema Camera',page.data)
-        self.assertIn(b'North Study Room',page.data)
+        self.assertIn(b'No sample spaces yet',page.data)
+        self.assertIn(b'2D',page.data)
         self.assertIn(b'NOT TO SCALE',page.data)
-        self.assertIn(b'Booked in',page.data)
+        self.assertIn(b'Starts within 15 min',page.data)
 
     def test_status_endpoint_is_private_and_not_cached(self):
         self.login()
@@ -76,22 +76,22 @@ class VisualStudioIntegrationTests(unittest.TestCase):
             db.commit()
         self.login()
         self.assertEqual(self.client.get('/api/availability-status').get_json()['resources'][str(self.room.id)]['state'],'OCCUPIED')
-        self.assertIn(b'Occupied now',self.client.get('/resources').data)
+        self.assertIn(b'Booked now',self.client.get('/resources').data)
 
     def test_disabled_takes_priority_over_reservations(self):
         self.svc.update_resource(self.admin,self.room.id,is_enabled=False)
         self.login()
         payload=self.client.get('/api/availability-status').get_json()
         self.assertEqual(payload['resources'][str(self.room.id)]['state'],'DISABLED')
-        self.assertIn(b'Out of service',self.client.get('/resources').data)
+        self.assertIn(b'Unavailable',self.client.get('/resources').data)
 
     def test_resources_are_linked_from_map_to_booking_page(self):
         self.login()
         response=self.client.get('/studio')
-        self.assertIn(f'/resources/{self.camera.id}'.encode(),response.data)
-        self.assertIn(f'/resources/{self.room.id}'.encode(),response.data)
+        self.assertIn(b'No sample spaces yet',response.data)
+        self.assertNotIn(b'Cinema Camera',response.data)
         page=self.client.get(f'/resources/{self.camera.id}')
-        self.assertIn(b'View on 2D map',page.data)
+        self.assertIn(b'Seat map',page.data)
         self.assertIn(b'datetime-local',page.data)
 
 if __name__=='__main__':

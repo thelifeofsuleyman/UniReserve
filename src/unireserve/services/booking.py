@@ -15,8 +15,9 @@ from sqlalchemy.orm import Session
 
 from unireserve.domain.availability import TimeWindow
 from unireserve.domain.live_status import ConfirmedInterval, StatusView, current_status
+from unireserve.domain.operating_hours import open_at, within_hours
 from unireserve.storage.db import write_transaction
-from unireserve.storage.models import Reservation, ReservationEvent, Resource, User
+from unireserve.storage.models import Reservation, ReservationEvent, Resource, User, Space, SpaceClosure
 
 
 class BookingError(Exception):
@@ -57,8 +58,21 @@ class ResourceRecord:
     category: str
     requires_approval: bool
     is_enabled: bool
+    space_id: int | None = None
+    is_listed: bool = True
 
 
+@dataclass(frozen=True)
+class SpaceRecord:
+    id: int
+    public_code: str
+    name: str
+    kind: str
+    opens_at: str
+    closes_at: str
+    open_days: str
+    policy_note: str
+    is_enabled: bool
 
 
 @dataclass(frozen=True)
@@ -98,7 +112,7 @@ def _view(booking: Reservation) -> BookingRecord:
 def _resource_view(resource: Resource) -> ResourceRecord:
     return ResourceRecord(
         resource.id, resource.public_code, resource.name, resource.category,
-        resource.requires_approval, resource.is_enabled,
+        resource.requires_approval, resource.is_enabled, resource.space_id, resource.is_listed,
     )
 
 
@@ -146,10 +160,89 @@ class BookingService:
             raise InvalidRequest("reservation must start in the future")
         if start > now + timedelta(days=14):
             raise InvalidRequest("reservation start exceeds the 14-day horizon")
-        limit = timedelta(hours=2 if resource.category == "ROOM" else 24)
+        # Workstations, library computers and seats have shorter session limits.
+        limit = timedelta(hours=2 if resource.space_id is not None or resource.category == "ROOM" else 24)
         if end - start > limit:
             raise InvalidRequest("reservation exceeds category duration limit")
         return start, end
+
+    @staticmethod
+    def _space_policy(session: Session, resource: Resource, start: datetime, end: datetime) -> None:
+        """Check venue hours and any scheduled class/maintenance closures."""
+        if resource.space_id is None:
+            return  # Legacy resource: current behavior, until assigned to a Space.
+        space = session.get(Space, resource.space_id)
+        if space is None or not within_hours(space, _from_naive_utc(start), _from_naive_utc(end)):
+            raise InvalidRequest("outside this area's booking hours or on a closed day")
+        closed = session.scalar(select(SpaceClosure.id).where(
+            SpaceClosure.space_id == space.id,
+            SpaceClosure.start_utc < end,
+            SpaceClosure.end_utc > start,
+        ).limit(1))
+        if closed is not None:
+            raise Conflict("this area is unavailable during teaching or maintenance")
+
+    def list_spaces(self, actor_id: int) -> list[SpaceRecord]:
+        with Session(self.engine) as session:
+            self._actor(session, actor_id)
+            return [SpaceRecord(s.id, s.public_code, s.name, s.kind, s.opens_at,
+                                s.closes_at, ",".join(str(d) for d in range(7) if s.open_days & (1 << d)), s.policy_note, s.is_enabled)
+                    for s in session.scalars(select(Space).order_by(Space.id)).all()]
+
+    def create_closure(self, actor_id: int, space_id: int, window: TimeWindow,
+                       reason: str) -> int:
+        if not reason.strip():
+            raise InvalidRequest("closure reason is required")
+        with write_transaction(self.engine) as session:
+            self._actor(session, actor_id, admin=True)
+            space = session.get(Space, space_id)
+            if space is None:
+                raise MissingRecord("space not found")
+            start, end = _to_naive_utc(window.start), _to_naive_utc(window.end)
+            # Refuse to silently invalidate already-confirmed seats/PCs.
+            resource_ids = select(Resource.id).where(Resource.space_id == space_id)
+            conflict = session.scalar(select(Reservation.id).where(
+                Reservation.resource_id.in_(resource_ids), Reservation.status == "CONFIRMED",
+                Reservation.start_utc < end, Reservation.end_utc > start,
+            ).limit(1))
+            if conflict is not None:
+                raise Conflict("cancel or relocate confirmed reservations before closing the area")
+            closure = SpaceClosure(space_id=space_id, start_utc=start, end_utc=end, reason=reason.strip())
+            session.add(closure)
+            session.flush()
+            return closure.id
+
+    def update_space_hours(self, actor_id: int, space_id: int,
+                           opens_at: str, closes_at: str, open_days: str) -> SpaceRecord:
+        """Change example hours safely without invalidating future bookings."""
+        from datetime import time
+        try:
+            start = time.fromisoformat(opens_at)
+            end = time.fromisoformat(closes_at)
+            days = {int(v) for v in open_days.split(",")}
+            if start >= end or not days or any(day < 0 or day > 6 for day in days):
+                raise ValueError("invalid hours or weekdays")
+            if len(opens_at) != 5 or len(closes_at) != 5:
+                raise ValueError("use HH:MM")
+        except (ValueError, TypeError) as exc:
+            raise InvalidRequest("use HH:MM opening/closing times and weekday numbers 0–6") from exc
+        with write_transaction(self.engine) as session:
+            self._actor(session, actor_id, admin=True)
+            space = session.get(Space, space_id)
+            if space is None:
+                raise MissingRecord("space not found")
+            space.opens_at, space.closes_at = opens_at, closes_at
+            space.open_days = sum(1 << d for d in days)
+            confirmed = session.scalars(select(Reservation)
+                .join(Resource, Resource.id == Reservation.resource_id)
+                .where(Resource.space_id == space.id, Reservation.status == "CONFIRMED",
+                       Reservation.end_utc > self._now(None))).all()
+            for b in confirmed:
+                if not within_hours(space, _from_naive_utc(b.start_utc), _from_naive_utc(b.end_utc)):
+                    raise Conflict("new operating hours would invalidate a confirmed reservation")
+            return SpaceRecord(space.id, space.public_code, space.name, space.kind,
+                               space.opens_at, space.closes_at, ",".join(str(d) for d in range(7) if space.open_days & (1 << d)),
+                               space.policy_note, space.is_enabled)
 
     @staticmethod
     def _event(session: Session, booking: Reservation, actor_id: int, action: str,
@@ -159,10 +252,13 @@ class BookingService:
             action=action, previous_status=previous, new_status=new, occurred_utc=now,
         ))
 
-    def list_resources(self, actor_id: int) -> list[ResourceRecord]:
+    def list_resources(self, actor_id: int, *, include_hidden: bool = False) -> list[ResourceRecord]:
         with Session(self.engine) as session:
             self._actor(session, actor_id)
-            return [_resource_view(r) for r in session.scalars(select(Resource).order_by(Resource.id)).all()]
+            statement = select(Resource).order_by(Resource.id)
+            if not include_hidden:
+                statement = statement.where(Resource.is_listed.is_(True))
+            return [_resource_view(r) for r in session.scalars(statement).all()]
 
 
     def get_resource(self, actor_id: int, resource_id: int) -> ResourceRecord:
@@ -197,7 +293,7 @@ class BookingService:
         aware_now = _from_naive_utc(moment)
         with Session(self.engine) as session:
             self._actor(session, actor_id)
-            resources = session.scalars(select(Resource).order_by(Resource.id)).all()
+            resources = session.scalars(select(Resource).where(Resource.is_listed.is_(True)).order_by(Resource.id)).all()
             active_or_future = session.scalars(
                 select(Reservation).where(
                     Reservation.status == "CONFIRMED", Reservation.end_utc > moment
@@ -207,17 +303,30 @@ class BookingService:
             for booking in active_or_future:
                 grouped.setdefault(booking.resource_id, []).append(ConfirmedInterval(
                     _from_naive_utc(booking.start_utc), _from_naive_utc(booking.end_utc)))
-            return {r.id: current_status(r.is_enabled, grouped[r.id], aware_now)
-                    for r in resources}
+            states = {}
+            for r in resources:
+                status = current_status(r.is_enabled, grouped[r.id], aware_now)
+                space = session.get(Space, r.space_id) if r.space_id else None
+                if r.is_enabled and space is not None:
+                    closed_for_hours = not open_at(space, aware_now)
+                    closed_for_class = session.scalar(select(SpaceClosure.id).where(
+                        SpaceClosure.space_id == space.id,
+                        SpaceClosure.start_utc <= moment, SpaceClosure.end_utc > moment,
+                    ).limit(1)) is not None
+                    if closed_for_hours or closed_for_class:
+                        status = StatusView("CLOSED", status.next_start, status.current_end)
+                states[r.id] = status
+            return states
 
     def available(self, actor_id: int, resource_id: int, window: TimeWindow) -> bool:
         with Session(self.engine) as session:
             self._actor(session, actor_id)
             resource = self._resource(session, resource_id)
-            self._request_valid(window, resource, self._now(None))
-            return resource.is_enabled and self._no_conflict(
-                session, resource_id, _to_naive_utc(window.start), _to_naive_utc(window.end)
-            )
+            start, end = self._request_valid(window, resource, self._now(None))
+            if not resource.is_listed or not resource.is_enabled:
+                return False
+            self._space_policy(session, resource, start, end)
+            return self._no_conflict(session, resource_id, start, end)
 
     def request(self, actor_id: int, resource_id: int, window: TimeWindow,
                 *, now: datetime | None = None) -> BookingRecord:
@@ -227,9 +336,10 @@ class BookingService:
             if actor.role not in ("STUDENT", "STAFF"):
                 raise AccessDenied("only students and staff may request bookings")
             resource = self._resource(session, resource_id)
-            if not resource.is_enabled:
-                raise InvalidRequest("resource is disabled")
+            if not resource.is_enabled or not resource.is_listed:
+                raise InvalidRequest("resource is unavailable for new reservations")
             start, end = self._request_valid(window, resource, moment)
+            self._space_policy(session, resource, start, end)
             # Pending requests do not reserve capacity, but requests for an
             # already confirmed slot are rejected even for restricted resources.
             if not self._no_conflict(session, resource_id, start, end):
@@ -289,8 +399,9 @@ class BookingService:
                 raise InvalidRequest("request is no longer pending")
             if approve:
                 resource = self._resource(session, booking.resource_id)
-                if not resource.is_enabled:
-                    raise InvalidRequest("resource is disabled")
+                if not resource.is_enabled or not resource.is_listed:
+                    raise InvalidRequest("resource is unavailable")
+                self._space_policy(session, resource, booking.start_utc, booking.end_utc)
                 if booking.start_utc <= moment:
                     raise InvalidRequest("cannot approve a reservation that has already started")
                 if not self._no_conflict(session, booking.resource_id, booking.start_utc, booking.end_utc):
@@ -301,22 +412,25 @@ class BookingService:
             return _view(booking)
 
     def create_resource(self, actor_id: int, code: str, name: str, category: str,
-                        *, requires_approval: bool = False) -> ResourceRecord:
+                        *, requires_approval: bool = False, space_id: int | None = None) -> ResourceRecord:
         if not code.strip() or not name.strip() or category not in ("ROOM", "EQUIPMENT"):
             raise InvalidRequest("valid code, name and category are required")
         with write_transaction(self.engine) as session:
             self._actor(session, actor_id, admin=True)
             if session.scalar(select(Resource.id).where(Resource.public_code == code.strip())) is not None:
                 raise InvalidRequest("resource code already exists")
+            if space_id is not None and session.get(Space, space_id) is None:
+                raise InvalidRequest("selected area does not exist")
             resource = Resource(public_code=code.strip(), name=name.strip(), category=category,
-                                requires_approval=requires_approval, is_enabled=True)
+                                requires_approval=requires_approval, is_enabled=True, space_id=space_id)
             session.add(resource)
             session.flush()
             return _resource_view(resource)
 
     def update_resource(self, actor_id: int, resource_id: int, *, name: str | None = None,
                         category: str | None = None, requires_approval: bool | None = None,
-                        is_enabled: bool | None = None) -> ResourceRecord:
+                        is_enabled: bool | None = None, is_listed: bool | None = None,
+                        space_id: int | None = None) -> ResourceRecord:
         if name is not None and not name.strip():
             raise InvalidRequest("resource name is required")
         if category is not None and category not in ("ROOM", "EQUIPMENT"):
@@ -332,6 +446,12 @@ class BookingService:
                 resource.requires_approval = requires_approval
             if is_enabled is not None:
                 resource.is_enabled = is_enabled
+            if is_listed is not None:
+                resource.is_listed = is_listed
+            if space_id is not None:
+                if session.get(Space, space_id) is None:
+                    raise InvalidRequest("selected area does not exist")
+                resource.space_id = space_id
             session.flush()
             return _resource_view(resource)
 

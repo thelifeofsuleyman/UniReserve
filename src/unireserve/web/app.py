@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from unireserve.domain.availability import TimeWindow
+from unireserve.domain.operating_hours import BAKU, open_at
 from unireserve.services.booking import (
     AccessDenied, BookingService, Conflict, InvalidRequest, MissingRecord, BookingError,
 )
@@ -130,12 +131,25 @@ def create_app(test_config: dict | None = None) -> Flask:
         except (KeyError, TypeError, ValueError) as exc:
             raise InvalidRequest("Enter valid start and end times (end must be after start).") from exc
 
-    def time_suggestions():
+    def time_suggestions(space=None):
         local_now = datetime.now(display_zone)
         start = (local_now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         # Always at least 1h in the future.
         if start <= local_now:
             start += timedelta(hours=1)
+        if space is not None:
+            from datetime import time
+            days = {int(x) for x in space.open_days.split(",") if x.strip()}
+            # Next safe, bookable local hour: not necessarily the present hour.
+            for _ in range(16):
+                if start.weekday() in days and space.is_enabled:
+                    opening = datetime.combine(start.date(), time.fromisoformat(space.opens_at), display_zone)
+                    closing = datetime.combine(start.date(), time.fromisoformat(space.closes_at), display_zone)
+                    start = max(start, opening)
+                    if start + timedelta(hours=1) <= closing:
+                        break
+                start = datetime.combine(start.date() + timedelta(days=1),
+                                         time.fromisoformat(space.opens_at), display_zone)
         end = start + timedelta(hours=1)
         return start.strftime("%Y-%m-%dT%H:%M"), end.strftime("%Y-%m-%dT%H:%M")
 
@@ -176,43 +190,38 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.context_processor
     def image_and_status_helpers():
         def resource_photo(resource):
-            label = (resource.name + " " + resource.public_code).casefold()
-            if "camera" in label or "cam" in label or "photo" in label:
-                return "photo-camera"
-            if "laptop" in label or "computer" in label:
-                return "photo-laptop"
-            if "project" in label or "meeting" in label or "conference" in label:
-                return "photo-meeting"
-            return "photo-study" if resource.category == "ROOM" else "photo-camera"
+            name = (resource.name + " " + resource.public_code).casefold()
+            if "pc" in name or "workstation" in name or "computer" in name:
+                return "photo-lab"
+            if "reading" in name or "seat" in name:
+                return "photo-library"
+            return "photo-study"
         return {"resource_photo": resource_photo, "display_status": display_status}
 
-    def studio_points(resources, statuses):
-        # A clear demo layout, not a surveyed map of any real university building.
-        # IDs provide stable positions across page loads and are not coordinates in a campus room.
-        rooms = [r for r in resources if r.category == "ROOM"]
-        equipment = [r for r in resources if r.category == "EQUIPMENT"]
-        result = []
-        for section, items, positions in (
-            ("ROOM", rooms, ((12, 19), (53, 17), (13, 65), (52, 64), (33, 42), (68, 48))),
-            ("EQUIPMENT", equipment, ((12, 20), (54, 20), (12, 65), (54, 65), (32, 44), (75, 45))),
-        ):
-            for index, resource in enumerate(items):
-                x, y = positions[index % len(positions)]
-                # Small offset for inventories larger than the default demo set.
-                if index >= len(positions):
-                    x = min(83, x + (index // len(positions)) * 5)
-                    y = min(82, y + (index // len(positions)) * 5)
-                result.append({"resource": resource, "section": section,
-                               "x": x, "y": y, "status": statuses[resource.id]})
-        return result
+    def studio_groups(resources, spaces, statuses):
+        """Stable, illustrative seat plans grouped by bookable area."""
+        groups = []
+        for space in spaces:
+            items = sorted((r for r in resources if r.space_id == space.id), key=lambda r: r.public_code)
+            if not items:
+                continue
+            points = []
+            # Four across, repeated rows: positions represent only a demo schematic.
+            for i, resource in enumerate(items):
+                col, row = i % 4, i // 4
+                points.append({"resource": resource, "x": 14 + 24 * col,
+                               "y": 22 + row * 31, "status": statuses[resource.id]})
+            groups.append({"space": space, "points": points, "count": len(items)})
+        return groups
 
     @app.get("/studio")
     @login_required
     def studio():
         resources = service.list_resources(actor_id())
         statuses = service.status_overview(actor_id())
-        return render_template("studio.html", page_title="Live resource studio",
-                               points=studio_points(resources, statuses),
+        spaces = service.list_spaces(actor_id())
+        return render_template("studio.html", page_title="Choose a seat or PC",
+                               groups=studio_groups(resources, spaces, statuses),
                                resources=resources, statuses=statuses,
                                checked_time=datetime.now(display_zone).strftime("%H:%M"))
 
@@ -238,16 +247,25 @@ def create_app(test_config: dict | None = None) -> Flask:
     def resources():
         records = service.list_resources(actor_id())
         category = request.args.get("category", "ALL").upper()
-        if category not in ("ALL", "ROOM", "EQUIPMENT"):
+        if category not in ("ALL", "ROOM", "EQUIPMENT", "SEAT", "PC", "LAB", "STUDY"):
             category = "ALL"
         term = request.args.get("q", "").strip()[:100]
-        visible = [r for r in records if (category == "ALL" or r.category == category)
+        spaces = {s.id: s for s in service.list_spaces(actor_id())}
+        def matches_category(r):
+            kind = spaces[r.space_id].kind if r.space_id in spaces else ""
+            return (category == "ALL" or r.category == category
+                    or (category == "SEAT" and kind == "LIBRARY_SEAT")
+                    or (category == "PC" and kind in ("LIBRARY_PC", "COMPUTER_LAB"))
+                    or (category == "LAB" and kind == "COMPUTER_LAB")
+                    or (category == "STUDY" and kind == "STUDY_ROOM"))
+        visible = [r for r in records if matches_category(r)
                    and (not term or term.casefold() in (r.name + " " + r.public_code).casefold())]
         statuses = service.status_overview(actor_id())
         return render_template("resources.html", page_title="Explore resources", resources=visible, statuses=statuses,
                                category=category, term=term, total=len(records),
                                room_count=sum(r.category == "ROOM" for r in records),
-                               equipment_count=sum(r.category == "EQUIPMENT" for r in records))
+                               equipment_count=sum(r.category == "EQUIPMENT" for r in records),
+                               spaces=spaces, space_count=len(spaces))
 
     @app.get("/resources/<int:resource_id>")
     @login_required
@@ -256,7 +274,11 @@ def create_app(test_config: dict | None = None) -> Flask:
             resource = service.get_resource(actor_id(), resource_id)
         except BookingError as exc:
             return resolve_error(exc, url_for("resources"))
-        suggested_start, suggested_end = time_suggestions()
+        spaces = {s.id: s for s in service.list_spaces(actor_id())}
+        space = spaces.get(resource.space_id)
+        if not resource.is_listed:
+            abort(404)
+        suggested_start, suggested_end = time_suggestions(space)
         # Preserve the user's chosen time after an availability check or
         # failed booking. Never substitute an unvalidated browser value.
         chosen_start = request.args.get("start", "")
@@ -269,7 +291,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         statuses = service.status_overview(actor_id())
         return render_template("resource_detail.html", page_title=resource.name,
                                resource=resource, current_status=statuses[resource.id],
-                               start=chosen_start, end=chosen_end)
+                               start=chosen_start, end=chosen_end, space=space)
 
     def resume_booking_url(resource_id: int) -> str:
         return url_for("resource_detail", resource_id=resource_id,
@@ -307,7 +329,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     @login_required
     def my_reservations():
         bookings = service.list_own(actor_id())
-        names = {r.id: r for r in service.list_resources(actor_id())}
+        names = {r.id: r for r in service.list_resources(actor_id(), include_hidden=True)}
         return render_template("my_reservations.html", page_title="My reservations", bookings=bookings[::-1],
                                resource_names=names, utc_now=datetime.now(timezone.utc))
 
@@ -338,9 +360,11 @@ def create_app(test_config: dict | None = None) -> Flask:
     @admin_required
     def admin():
         pending = service.list_pending(actor_id())
-        resources = service.list_resources(actor_id())
+        resources = service.list_resources(actor_id(), include_hidden=True)
+        spaces = service.list_spaces(actor_id())
         return render_template("admin.html", page_title="Administration", pending=pending,
-                               resources=resources, active_count=sum(r.is_enabled for r in resources))
+                               resources=resources, spaces=spaces,
+                               active_count=sum(r.is_enabled and r.is_listed for r in resources))
 
     @app.post("/admin/requests/<int:reservation_id>/<choice>")
     @admin_required
@@ -360,7 +384,8 @@ def create_app(test_config: dict | None = None) -> Flask:
         try:
             service.create_resource(actor_id(), request.form.get("code", ""),
                                     request.form.get("name", ""), request.form.get("category", ""),
-                                    requires_approval=(request.form.get("requires_approval") == "on"))
+                                    requires_approval=(request.form.get("requires_approval") == "on"),
+                                    space_id=int(request.form["space_id"]) if request.form.get("space_id", "").isdigit() else None)
             flash("Resource added to catalogue.", "success")
         except BookingError as exc:
             return resolve_error(exc, url_for("admin"))
@@ -373,8 +398,35 @@ def create_app(test_config: dict | None = None) -> Flask:
             service.update_resource(actor_id(), resource_id, name=request.form.get("name", ""),
                                     category=request.form.get("category", ""),
                                     requires_approval=(request.form.get("requires_approval") == "on"),
-                                    is_enabled=(request.form.get("is_enabled") == "on"))
+                                    is_enabled=(request.form.get("is_enabled") == "on"),
+                                    is_listed=(request.form.get("is_listed") == "on") if request.form.get("is_listed_present") == "1" else None,
+                                    space_id=int(request.form["space_id"]) if request.form.get("space_id", "").isdigit() else None)
             flash("Resource settings saved.", "success")
+        except BookingError as exc:
+            return resolve_error(exc, url_for("admin"))
+        return redirect(url_for("admin"))
+
+    @app.post("/admin/spaces/<int:space_id>/closures")
+    @admin_required
+    def admin_add_closure(space_id: int):
+        try:
+            svc_window = form_window()
+            service.create_closure(actor_id(), space_id, svc_window,
+                                   request.form.get("reason", ""))
+            flash("Teaching/maintenance closure saved.", "success")
+        except BookingError as exc:
+            return resolve_error(exc, url_for("admin"))
+        return redirect(url_for("admin"))
+
+    @app.post("/admin/spaces/<int:space_id>/hours")
+    @admin_required
+    def admin_change_hours(space_id: int):
+        try:
+            service.update_space_hours(actor_id(), space_id,
+                                       request.form.get("opens_at", ""),
+                                       request.form.get("closes_at", ""),
+                                       request.form.get("open_days", ""))
+            flash("Example area schedule updated.", "success")
         except BookingError as exc:
             return resolve_error(exc, url_for("admin"))
         return redirect(url_for("admin"))

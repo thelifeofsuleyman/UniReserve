@@ -18,16 +18,20 @@ from unireserve.storage.accounts import provision_demo_user
 from unireserve.storage.db import create_schema, make_engine
 from unireserve.storage.models import User, Resource
 from unireserve.services.booking import BookingService
+from unireserve.storage.aztu_demo import sync_demo_catalog
 
 
 def seed(db_path: str):
     engine = make_engine(db_path)
     create_schema(engine)
     with Session(engine) as db:
-        if db.scalar(select(func.count(User.id))):
-            print("This database already has user accounts; no accounts or passwords were changed.")
-            print("To start fresh, use a NEW database filename rather than overwriting existing bookings.")
-            return
+        existing_accounts = bool(db.scalar(select(func.count(User.id))))
+    if existing_accounts:
+        summary = sync_demo_catalog(engine)
+        print("Existing accounts and reservations preserved; no passwords changed.")
+        print("AzTU-inspired demo catalogue synchronized:", summary)
+        print("Note: sample seat counts and lab hours are not verified campus policies.")
+        return
     users = {}
     for email, role in (("student@unireserve.test", "STUDENT"),
                         ("staff@unireserve.test", "STAFF"),
@@ -35,19 +39,8 @@ def seed(db_path: str):
         password = secrets.token_urlsafe(15)
         uid = provision_demo_user(engine, email, password, role)
         users[email] = (password, uid)
-    svc = BookingService(engine)
-    resource_specs = (
-        ("ROOM-101", "North Study Room", "ROOM", False),
-        ("ROOM-202", "Creative Studio", "ROOM", True),
-        ("EQ-CAM-01", "Sony Mirrorless Camera", "EQUIPMENT", True),
-        ("EQ-LAP-01", "Development Laptop", "EQUIPMENT", False),
-        ("EQ-MIC-01", "Podcast Microphone", "EQUIPMENT", False),
-        ("EQ-PROJ-01", "Portable Projector", "EQUIPMENT", True),
-    )
-    for code, name, category, needs_approval in resource_specs:
-        svc.create_resource(users["admin@unireserve.test"][1], code, name, category,
-                            requires_approval=needs_approval)
-    print(f"Created 3 users and {len(resource_specs)} resources in {db_path}")
+    summary = sync_demo_catalog(engine)
+    print(f"Created 3 users and AzTU-inspired sample seat/PC catalogue in {db_path}:", summary)
     print("DEMO CREDENTIALS — keep these private; they are shown only once:\n")
     for email, (password, _) in users.items():
         print(f"  {email}  /  {password}")
