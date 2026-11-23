@@ -153,6 +153,28 @@ class BookingService:
         return existing is None
 
     @staticmethod
+    def _no_other_space_booking(session: Session, user_id: int, resource: Resource,
+                                start: datetime, end: datetime) -> bool:
+        """CR-003: one simultaneous confirmed campus study-space per user.
+
+        This is a proposed *demo fairness policy*, not verified AzTU rules.
+        Ignore legacy inventory with no Space and nonblocking pending requests.
+        """
+        if resource.space_id is None:
+            return True
+        existing = session.scalar(
+            select(Reservation.id).join(Resource, Resource.id == Reservation.resource_id)
+            .where(
+                Reservation.user_id == user_id,
+                Resource.space_id.is_not(None),
+                Reservation.status == "CONFIRMED",
+                Reservation.start_utc < end,
+                Reservation.end_utc > start,
+            ).limit(1)
+        )
+        return existing is None
+
+    @staticmethod
     def _request_valid(window: TimeWindow, resource: Resource, now: datetime) -> tuple[datetime, datetime]:
         start = _to_naive_utc(window.start)
         end = _to_naive_utc(window.end)
@@ -326,7 +348,8 @@ class BookingService:
             if not resource.is_listed or not resource.is_enabled:
                 return False
             self._space_policy(session, resource, start, end)
-            return self._no_conflict(session, resource_id, start, end)
+            return (self._no_conflict(session, resource_id, start, end)
+                    and self._no_other_space_booking(session, actor_id, resource, start, end))
 
     def request(self, actor_id: int, resource_id: int, window: TimeWindow,
                 *, now: datetime | None = None) -> BookingRecord:
@@ -344,6 +367,8 @@ class BookingService:
             # already confirmed slot are rejected even for restricted resources.
             if not self._no_conflict(session, resource_id, start, end):
                 raise Conflict("resource is already reserved for this interval")
+            if not self._no_other_space_booking(session, actor.id, resource, start, end):
+                raise Conflict("you already have another confirmed study-space booking at this time")
             status = "PENDING_APPROVAL" if resource.requires_approval else "CONFIRMED"
             booking = Reservation(user_id=actor.id, resource_id=resource.id,
                                   start_utc=start, end_utc=end, status=status, created_utc=moment)
@@ -406,6 +431,10 @@ class BookingService:
                     raise InvalidRequest("cannot approve a reservation that has already started")
                 if not self._no_conflict(session, booking.resource_id, booking.start_utc, booking.end_utc):
                     raise Conflict("another confirmed booking occupies the interval")
+                if not self._no_other_space_booking(
+                    session, booking.user_id, resource, booking.start_utc, booking.end_utc
+                ):
+                    raise Conflict("requester already has another confirmed study-space booking at this time")
             booking.status = "CONFIRMED" if approve else "REJECTED"
             self._event(session, booking, actor_id, "APPROVED" if approve else "REJECTED",
                         "PENDING_APPROVAL", booking.status, moment)
@@ -452,6 +481,24 @@ class BookingService:
                 if session.get(Space, space_id) is None:
                     raise InvalidRequest("selected area does not exist")
                 resource.space_id = space_id
+            # CR-003: do not silently move future confirmed bookings outside
+            # their area's hours, onto a closure, or beyond a new duration cap.
+            if space_id is not None or category is not None:
+                future = session.scalars(
+                    select(Reservation).where(
+                        Reservation.resource_id == resource.id,
+                        Reservation.status == "CONFIRMED",
+                        Reservation.end_utc > self._now(None),
+                    )
+                ).all()
+                limit = timedelta(hours=2 if resource.space_id is not None or resource.category == "ROOM" else 24)
+                for booking in future:
+                    if booking.end_utc - booking.start_utc > limit:
+                        raise Conflict("edit would shorten maximum duration of an existing confirmed booking")
+                    try:
+                        self._space_policy(session, resource, booking.start_utc, booking.end_utc)
+                    except (InvalidRequest, Conflict) as exc:
+                        raise Conflict("selected area is incompatible with an existing confirmed booking") from exc
             session.flush()
             return _resource_view(resource)
 
