@@ -1,19 +1,22 @@
-# User Feedback Log — UniReserve
+# UniReserve — Actual UI Feedback Log
 
-Feedback source: direct comments by the project owner in the ChatGPT development discussion. No fabricated interviews, survey scores, or usability sessions are included.
+Only direct owner comments and observed screenshots are recorded. This is not a student interview survey.
 
-| ID | Date | Observation / request | Change request | Status | Verification |
-|---|---|---|---|---|---|
-| UX-001 | 2026-11-23 | The interface was logically sound but visually unsatisfying; it lacked imagery and felt too generic. | CR-001 | Implemented in M5.5; owner acceptance pending | Photo-based cards and login area, stronger visual identity; offline screenshot review |
-| UX-002 | 2026-11-23 | Show equipment/rooms as positions on a 2D/3D layout and distinguish green available, red occupied and yellow if a booking begins within 15 minutes. | CR-001 | Implemented in M5.5; owner acceptance pending | Interactive 2D map, API snapshots, boundary-value tests including exactly 15 minutes |
+| ID | Date | Actual owner feedback/evidence | Change request | Engineering outcome |
+|---|---|---|---|---|
+| UX-001 | 2026-11-23 | First web interface felt generic and had no photos. | CR-001 | Reworked photo-led cards, colors and hierarchy. |
+| UX-002 | 2026-11-23 | Asked for 2D/3D placement and green/red/yellow 15-minute availability. | CR-001 | 2D map, stored-booking status API, 15-minute threshold and tests. |
+| UX-003 | 2026-11-23 | Requested AzTU-like computer labs, library PCs, separately bookable study seats and realistic opening rules. | CR-002 | Four demo areas, 23 units, weekly schedules and closures, safe migration. |
+| UX-004 | 2026-11-23 | Two screenshots showed six obsolete starter resources with identical, mismatched photos and an empty seat map. Asked for distinct room images and logical seating. | CR-004 | Four original room-specific images, distinct layouts and automatic local catalogue sync. |
+| UX-005 | 2026-11-23 | Responded "it is perfect do these steps" to the final pre-submission checklist. | Final handoff | Positive response to the plan; **not** evidence of an independently observed full Windows walkthrough or a measured usability study. |
 
-## What we did not claim
-- No owner feedback has yet been collected on the **revised** version.
-- The map positions are illustrative demonstration coordinates; they are not a campus floor survey or live occupancy measurements.
-- The images are original generated artwork, not photography of the user's university.
-- Current availability is calculated from **confirmed reservations in SQLite**, refreshed in the Studio every 30 seconds, and never treated as a final booking lock.
+## Current 2D room-plan design
+- **Reading area:** eight individually bookable seats in two banks of four, access aisle.
+- **Library PC area:** six independently bookable PCs in two banks of three.
+- **Teaching lab:** eight workstations, teaching screen and aisle; administrator approval as a demo rule.
+- **Group study:** one whole-room booking, decorative central six-chair table; chairs are not independently reservable.
 
-## Follow-up for the actual owner
-Try the Studio, resource catalogue and mobile layout. Record whether labels and colors are clear and whether the plan should use real room/floor labels. Any accepted changes should have an updated CR, tests and screenshots.
+Status colors reflect confirmed reservation records, not physical occupancy. Images, positions, operating hours and permissions are illustrative; the system does not claim to reproduce a surveyed AzTU site.
 
-| UX-003 | 2026-11-23 | Owner asked to model AzTU computer labs, library PCs and separately bookable seats, respect working hours, and remove unrelated rental equipment. | CR-002 | Implemented; owner visual acceptance pending | AzTU-themed catalogue, individual-seat Studio, schedule and migration tests |
+## Remaining user acceptance checks
+Actual Windows screenshot of the **latest** CR-004 version, full student/admin booking walkthrough, mobile and keyboard-only exploration. NFR-006 five-volunteer results have not been collected. Document any subsequent feedback with date and concrete evidence.
