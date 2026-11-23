@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import (Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request,
                    session, url_for)
+from werkzeug.middleware.proxy_fix import ProxyFix
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -56,10 +57,17 @@ def create_app(test_config: dict | None = None) -> Flask:
     )
     if test_config is not None:
         app.config.update(test_config)
+    if production and os.environ.get("UNIRESERVE_PROXY_COUNT"):
+        proxy_count = int(os.environ["UNIRESERVE_PROXY_COUNT"])
+        if not 1 <= proxy_count <= 3:
+            raise RuntimeError("UNIRESERVE_PROXY_COUNT must be between 1 and 3")
+        # Enable only behind the exact number of trusted reverse proxies.
+        # The reverse proxy must replace forwarded headers from clients.
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=proxy_count, x_host=proxy_count)
     if app.config["AUTO_SAMPLE_CATALOG"] is None:
         app.config["AUTO_SAMPLE_CATALOG"] = os.environ.get("UNIRESERVE_AUTO_SAMPLE_CATALOG", "0") == "1"
     if app.config["PRODUCTION_MODE"]:
-        if len(str(app.config.get("SECRET_KEY") or "")) < 32 or not os.environ.get("UNIRESERVE_SECRET_KEY"):
+        if (len(str(app.config.get("SECRET_KEY") or "")) < 32 or not os.environ.get("UNIRESERVE_SECRET_KEY") or str(app.config["SECRET_KEY"]).startswith("REPLACE_")):
             raise RuntimeError("Production requires a stable UNIRESERVE_SECRET_KEY of at least 32 characters")
         if not app.config.get("TRUSTED_HOSTS"):
             raise RuntimeError("Production requires UNIRESERVE_TRUSTED_HOSTS")

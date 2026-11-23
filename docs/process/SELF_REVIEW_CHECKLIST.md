@@ -33,3 +33,8 @@
 - Rewrite/approve the individual reflection so it honestly describes personal understanding and AI contribution.
 - Grant the lecturer access to the **private** GitHub repository (or follow a verified course-specific access instruction).
 - Submit the URL in KOICA by **2 December 2026**, retaining a receipt or screenshot. Do not claim submitted until that evidence exists.
+
+
+## CR-005 presentation and deployment update
+
+Product-facing screens now use service-language rather than repeated student-project warnings. Account/space provisioning, a local Waitress launcher, and a production-mode WSGI/secret/host/HTTPS baseline were added; none of this implies a public service has been hosted. Security configuration and related tests are documented in `docs/deployment/OPERATIONS.md`. Existing independent AzTU disclaimers remain in the service-information page, official engineering reports and reflection, not repeated on every booking screen. Real world SSO, TLS termination and backup/recovery operations still need the hosting institution.
