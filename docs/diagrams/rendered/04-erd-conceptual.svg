@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="467px" preserveAspectRatio="none" style="width:665px;height:467px;" version="1.1" viewBox="0 0 665 467" width="665px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacingAndGlyphs" textLength="265" x="203" y="16.708">UniReserve - Conceptual ERD</text><!--MD5=[3fd616f346a44cd59a91eb10b19e157c]
+class User--><rect fill="#FEFECE" height="78.3828" id="User" style="stroke: #A80036; stroke-width: 1.5;" width="92" x="6" y="42.1931"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="29" x="37.5" y="58.3318">User</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="97" y1="66.1619" y2="66.1619"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="80" x="12" y="80.3723">user identifier</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="31" x="12" y="93.177">email</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="22" x="12" y="105.9817">role</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="97" y1="112.5759" y2="112.5759"/><!--MD5=[6b13f1b330d33795af281e5c1dfe1e98]
+class Resource--><rect fill="#FEFECE" height="103.9922" id="Resource" style="stroke: #A80036; stroke-width: 1.5;" width="135" x="138.5" y="29.3931"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="59" x="176.5" y="45.5318">Resource</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="139.5" x2="272.5" y1="53.3619" y2="53.3619"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="144.5" y="67.5723">resource identifier</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="32" x="144.5" y="80.377">name</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="49" x="144.5" y="93.1817">category</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="123" x="144.5" y="105.9864">approval requirement</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="84" x="144.5" y="118.7911">availability flag</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="139.5" x2="272.5" y1="125.3853" y2="125.3853"/><!--MD5=[9c46470aa33a0c75e6d1dfdefc2f9c22]
+class Reservation--><rect fill="#FEFECE" height="78.3828" id="Reservation" style="stroke: #A80036; stroke-width: 1.5;" width="131" x="140.5" y="210.3831"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="74" x="169" y="226.5218">Reservation</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="141.5" x2="270.5" y1="234.3519" y2="234.3519"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="119" x="146.5" y="248.5623">reservation identifier</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="71" x="146.5" y="261.367">time interval</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="36" x="146.5" y="274.1717">status</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="141.5" x2="270.5" y1="280.7659" y2="280.7659"/><!--MD5=[fc5bfadb9b233062f2daddb4babf469a]
+class ReservationEvent--><rect fill="#FEFECE" height="91.1875" id="ReservationEvent" style="stroke: #A80036; stroke-width: 1.5;" width="119" x="15.5" y="365.7631"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="113" x="18.5" y="381.9018">Reservation Event</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="16.5" x2="133.5" y1="389.7319" y2="389.7319"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="85" x="21.5" y="403.9423">event identifier</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="34" x="21.5" y="416.747">action</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="54" x="21.5" y="429.5517">transition</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="61" x="21.5" y="442.3564">timestamp</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="16.5" x2="133.5" y1="448.9506" y2="448.9506"/><path d="M306.5,229.4431 L306.5,245.5731 L271.82,249.5731 L306.5,253.5731 L306.5,269.7088 A0,0 0 0 0 306.5,269.7088 L653.5,269.7088 A0,0 0 0 0 653.5,269.7088 L653.5,239.4431 L643.5,229.4431 L306.5,229.4431 A0,0 0 0 0 306.5,229.4431 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M643.5,229.4431 L643.5,239.4431 L653.5,239.4431 L643.5,229.4431 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="326" x="312.5" y="246.51">Exactly one user and one resource per reservation.</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="326" x="312.5" y="261.6428">Confirmed intervals must not overlap per resource.</text><!--MD5=[c24e85aca65080b7f8317b6a9db850e8]
+link User to Reservation--><path d="M92.17,127.8331 C107.06,144.4831 124.17,163.4031 140,180.3831 C147.11,188.0131 154.74,196.0331 162.19,203.7931 " fill="none" id="User-Reservation" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="161.794" x2="171.667" y1="203.3772" y2="204.9661"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="161.794" x2="163.033" y1="203.3772" y2="213.3001"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="161.794" x2="167.35" y1="203.3772" y2="209.1331"/><ellipse cx="157.627" cy="199.0602" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="86.6354" x2="92.5981" y1="127.6212" y2="122.2877"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="88.6355" x2="94.5982" y1="129.8572" y2="124.5237"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="92.2835" x2="86.95" y1="127.9358" y2="121.9731"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="56" x="141" y="176.45">requests</text><!--MD5=[4947977122a825650bf00a952dc4a9e4]
+link Resource to Reservation--><path d="M206,143.0131 C206,162.0431 206,182.7731 206,200.7831 " fill="none" id="Resource-Reservation" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="206" x2="212" y1="200.4131" y2="208.4131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="206" x2="200" y1="200.4131" y2="208.4131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="206" x2="206" y1="200.4131" y2="208.4131"/><ellipse cx="206" cy="194.4131" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="202" x2="210" y1="139.1131" y2="139.1131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="202" x2="210" y1="142.1131" y2="142.1131"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="206" x2="206" y1="143.1131" y2="135.1131"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="64" x="207" y="176.45">schedules</text><!--MD5=[cfa6f33c5dd126df09ca9f861ee67767]
+link Reservation to ReservationEvent--><path d="M168.39,296.4431 C152.55,315.7731 134.03,338.3631 117.67,358.3131 " fill="none" id="Reservation-ReservationEvent" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="117.7821" x2="117.3499" y1="358.1666" y2="368.1572"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="117.7821" x2="108.0701" y1="358.1666" y2="360.549"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="117.7821" x2="112.71" y1="358.1666" y2="364.3531"/><ellipse cx="121.5862" cy="353.5266" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="167.7007" x2="173.8872" y1="290.9803" y2="296.0525"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="165.7986" x2="171.9852" y1="293.3003" y2="298.3724"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="168.2579" x2="173.33" y1="296.6097" y2="290.4231"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="48" x="149.34" y="331.83">records</text><!--MD5=[1ebcab7318b0df8fcf608b619bd0f77a]
+link User to ReservationEvent--><path d="M53.94,130.2331 C55.78,172.0831 58.88,234.4931 63,288.7631 C64.67,310.7731 66.97,334.9831 69.1,355.9631 " fill="none" id="User-ReservationEvent" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="69.1056" x2="75.8888" y1="355.8947" y2="363.2423"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="69.1056" x2="63.9512" y1="355.8947" y2="364.4639"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="69.1056" x2="69.92" y1="355.8947" y2="363.8531"/><ellipse cx="68.4948" cy="349.9259" fill="none" rx="4" ry="4" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="49.7753" x2="57.7679" y1="126.521" y2="126.1779"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="49.9039" x2="57.8966" y1="129.5183" y2="129.1751"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="53.9432" x2="53.6" y1="130.3458" y2="122.3531"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="58" x="64" y="254.14">performs</text><!--MD5=[bef54af3583b97cb90d90878e7dbfc2c]
+@startuml
+title UniReserve - Conceptual ERD
+skinparam shadowing false
+hide circle
+entity "User" as User {
+  user identifier
+  email
+  role
+}
+entity "Resource" as Resource {
+  resource identifier
+  name
+  category
+  approval requirement
+  availability flag
+}
+entity "Reservation" as Reservation {
+  reservation identifier
+  time interval
+  status
+}
+entity "Reservation Event" as ReservationEvent {
+  event identifier
+  action
+  transition
+  timestamp
+}
+User ||- -o{ Reservation : requests
+Resource ||- -o{ Reservation : schedules
+Reservation ||- -o{ ReservationEvent : records
+User ||- -o{ ReservationEvent : performs
+note right of Reservation
+  Exactly one user and one resource per reservation.
+  Confirmed intervals must not overlap per resource.
+end note
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.5+8-LTS
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>
