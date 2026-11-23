@@ -5,6 +5,8 @@ on:
     branches: [design/uml-architecture, process/traceability, feature/aztu-study-seats]
     paths:
       - 'docs/diagrams/source/**'
+      - 'docs/testing/CR-002_TEST_ADDENDUM.md'
+      - 'docs/change-management/CR-002-aztu-seat-reservations.md'
       - 'docs/diagrams/README.md'
       - 'scripts/validate_models.py'
       - '.github/workflows/render-diagrams.yml'

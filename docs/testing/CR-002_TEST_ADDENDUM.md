@@ -15,6 +15,6 @@
 
 **Tests:** `tests/test_aztu_policy.py` and `tests/test_aztu_web.py`. Execute with `python scripts/run_tests.py` plus `python scripts/validate_models.py` and `python scripts/validate_traceability.py`.
 
-**Execution evidence:** Do not treat this paragraph as a test pass. The final verified count and GitHub Actions link will be entered only after the current pull request CI completes. Previous report figures of 85 tests / 94% coverage apply to the earlier version, not this one.
+**Execution evidence (verified):** On GitHub Actions, PR #9 revision `cd023fdad` completed **109/109 automated tests** with **94% statement coverage** on Python **3.11.18**. Existing synchronized 50-pair concurrency tests passed, as did the new space, closure, boundary, API and migration tests. The NFR-001 local-runner probe reported **200/200 requests within 1 second** (p95 **0.03083 s**) with 100 resources and 1,000 reservations. Source: https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45107393930. The export/validation runs also passed on this PR, including 16 diagrams and six generated PDFs. **This is CI evidence, not a volunteer usability evaluation or verification of real AzTU lab opening hours.**
 
 **Outstanding manual review:** Owner evaluation of new room/seat plan, keyboard and mobile walkthrough, and confirmation of any real campus schedule by authorized staff. None is represented as completed.
