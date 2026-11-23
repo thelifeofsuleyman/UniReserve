@@ -27,5 +27,5 @@
   <div class="booking-calendar__slots" id="calendar-slots" role="group"
        aria-label="Select an available booking time"></div>
   <p class="booking-calendar__selection" id="calendar-selection" aria-live="polite"></p>
-  <p class="booking-calendar__hint">Green times are free for that half-hour. Select one to fill the form below, and adjust the end time if needed. Final availability is confirmed when you book.</p>
+  <p class="booking-calendar__hint">Green times are free for that half-hour. Select one to fill the form below, and adjust the end time if needed. Final availability is checked when you book.{% if resource.requires_approval %} This room requires approval; a request is not reserved until an administrator confirms it.{% endif %}</p>
 </section>
