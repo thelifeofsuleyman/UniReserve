@@ -61,3 +61,13 @@
     });
   }
 })();
+
+// CR-004: an area-card link focuses its real set of seat IDs on the 2D map.
+// All-zone rendering remains the fallback if JS is unavailable.
+(() => {
+  const requestedZone = new URLSearchParams(window.location.search).get('area');
+  if (!requestedZone) return;
+  const tab = Array.from(document.querySelectorAll('[data-zone-filter]'))
+    .find(el => el.dataset.zoneFilter === requestedZone);
+  if (tab) tab.click();
+})();

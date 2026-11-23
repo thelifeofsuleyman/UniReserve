@@ -123,3 +123,12 @@ The 2D map displays individually bookable Library Reading Seats, Library PCs, Te
 ### CR-003 — UI refinements and fair-use review
 
 After pulling the latest `main`, restart Flask (no re-seeding or schema migration needed). The updated local-image-based UI includes zone filters on the 2D map and availability badges whose color and text update together. **Status colors show global current booking status, not ownership or future guaranteed availability.** In the demo only, a user may hold at most one overlapping confirmed seat/PC/room. Different users may book distinct spots at the same time, pending approval still does not reserve the unit, and administrators cannot move confirmed future bookings to incompatible hours. See `docs/change-management/CR-003-ux-and-integrity.md` for decisions and known gaps.
+
+
+## CR-004: room-first catalogue, matching photos, and automatic local demo sync
+
+After `git pull origin main`, restart `python scripts/run_web.py`. The **local demo launcher** now detects an old empty-area database and automatically applies the idempotent four-area sample catalogue. You no longer have to remember to run `sync_aztu_demo.py` to get the clickable 2D room maps. It preserves existing users, passwords, booking history and audit events; it only archives the six known obsolete starter fixture codes. It does not reseed on every restart, and it never overwrites administrator changes to existing sample spaces. Opt out with `UNIRESERVE_AUTO_SAMPLE_CATALOG=0` in a terminal before running the demo.
+
+Four **different original illustrative photographs** correspond to: reading seats (8), library PCs (6), teaching lab PCs (8), and one group study room. These are **not verified images of AzTU buildings**. Catalogue cards represent each area once, followed by a searchable list of individually bookable units. The clickable 2D maps use two desk banks and an access aisle (or one group table) instead of generic rows of tiles. The booking logic still checks actual stored reservations and operating hours in the database.
+
+See `docs/change-management/CR-004-space-first-rooms.md` for the product-owner screenshots, rationale, test plan and remaining limitations.

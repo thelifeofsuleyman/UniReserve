@@ -1,29 +1,40 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="aztu-intro"><div><span class="eyebrow">AzTU / SPACE BOOKING DEMO</span><h1>Pick your <em>place.</em></h1><p>Reserve a specific library seat or computer, not the whole room. Each dot represents one bookable unit.</p></div><div class="studio-clock"><span class="studio-pulse"></span><div><strong>BOOKING STATUS</strong><span>Checked <time id="checked-at">{{ checked_time }}</time> · Asia/Baku</span></div></div></div>
-<div class="aztu-context"><strong>Built around real AzTU facilities, not a verified floor plan.</strong> The university describes its library reading areas and computer laboratories. <strong>NOT TO SCALE.</strong> The seat counts, positions and lab access rules shown here are illustrative demonstration data. <a href="https://aztu.edu.az/az/page/kampus-202" target="_blank" rel="noopener">Campus reference ↗</a></div>
-<div class="zone-toolbar"><div><strong>Choose a zone</strong><p>Every seat is selectable; use the area buttons to focus the map.</p></div><div class="zone-tabs" role="group" aria-label="Filter by study area"><button class="zone-tab selected" type="button" data-zone-filter="all" aria-pressed="true">All areas</button>{% for group in groups %}<button class="zone-tab" type="button" data-zone-filter="{{ group.space.id }}" aria-pressed="false">{{ group.space.name|replace(' (demo)','')|replace(' (sample)','') }}</button>{% endfor %}</div></div>
-<div class="signal-legend" aria-label="Availability status legend"><span><i class="signal-dot available"></i> Available</span><span><i class="signal-dot soon"></i> Starts within 15 min</span><span><i class="signal-dot occupied"></i> Booked now</span><span><i class="signal-dot closed"></i> Closed hours</span><span><i class="signal-dot disabled"></i> Unavailable</span></div>
-{% for group in groups %}
-<section class="aztu-zone-wrap" data-zone-id="{{ group.space.id }}">
-  <div class="zone-head"><div><span class="eyebrow">AREA {{ '%02d'|format(loop.index) }} / {{ group.space.kind|replace('_', ' ') }}</span><h2>{{ group.space.name }}</h2><p>{{ group.count }} individually reservable {{ 'units' if group.count != 1 else 'unit' }} · {{ group.space.opens_at }}–{{ group.space.closes_at }} (open weekdays: {{ group.space.open_days }}) · Asia/Baku</p></div><span class="zone-hours">{{ 'Approval needed' if group.space.kind == 'COMPUTER_LAB' else 'Advance booking' }}</span></div>
-  <div class="aztu-floor" role="group" aria-label="Demonstration seat layout for {{ group.space.name }}">
-    <div class="aztu-floor-top"><span class="floor-drawing-note">01 / EXAMPLE LAYOUT — NOT TO SCALE</span><span>WINDOW / DAYLIGHT ZONE</span></div>
-    <div class="aztu-floor-grid"><span class="floor-zone-label" aria-hidden="true">STUDY ZONE</span>
-    {% for point in group.points %}{% set r=point.resource %}{% set status=point.status %}
-      <a class="aztu-seat state-{{ status.state|lower }}" href="{{ url_for('resource_detail', resource_id=r.id) }}" data-resource-id="{{ r.id }}" data-state="{{ status.state }}" aria-label="{{ r.name }}: {{ status.state|lower }}">
-        <span class="desk-surface" aria-hidden="true"><span class="desk-monitor">{{ '▣' if r.category=='EQUIPMENT' else '▤' }}</span></span><span class="pin-name">{{ r.name }}</span>
-        <span class="seat-state" data-status-text>{{ {'AVAILABLE':'Available','SOON':'Soon','OCCUPIED':'Booked','CLOSED':'Closed','DISABLED':'Unavailable'}[status.state] }}</span>
-      </a>
-    {% endfor %}
+<div class="aztu-intro"><div><span class="eyebrow">AzTU / EXAMPLE STUDY AREAS</span><h1>Find your <em>place.</em></h1><p>Every workstation corresponds to a specific reservable unit. Choose the room first, then the position.</p></div><div class="studio-clock"><span class="studio-pulse"></span><div><strong>RESERVATION STATUS</strong><span>Checked <time id="checked-at">{{ checked_time }}</time> · Asia/Baku</span></div></div></div>
+<div class="aztu-context"><strong>These are independently designed room plans, not an AzTU building survey.</strong> The positions, unit numbers and lab schedules are illustrative; red/yellow/green/gray indicate stored bookings and policies, not physical presence. <a href="https://aztu.edu.az/az/page/kampus-202" target="_blank" rel="noopener noreferrer">AzTU campus reference ↗</a></div>
+<div class="zone-toolbar"><div><strong>Choose a room</strong><p>Four different layouts. You can reserve an individual seat or PC, or a whole group room.</p></div><div class="zone-tabs" role="group" aria-label="Show a specific study room"><button type="button" data-zone-filter="all" class="zone-tab selected" aria-pressed="true">All rooms</button>{% for group in groups %}<button type="button" data-zone-filter="{{ group.space.id }}" class="zone-tab" aria-pressed="false">{{ group.space.name|replace(' (demo)','')|replace(' (sample)','') }}</button>{% endfor %}</div></div>
+<div class="signal-legend" aria-label="Live availability color key"><span><i class="signal-dot available"></i> Available</span><span><i class="signal-dot soon"></i> Starts within 15 min</span><span><i class="signal-dot occupied"></i> Booked now</span><span><i class="signal-dot closed"></i> Closed hours</span><span><i class="signal-dot disabled"></i> Unavailable</span></div>
+{% for group in groups %}{% set kind=group.space.kind %}{% set half=(group.count + 1) // 2 %}
+<section class="aztu-zone-wrap campus-room-section" id="zone-{{ group.space.id }}" data-zone-id="{{ group.space.id }}" aria-labelledby="room-title-{{ group.space.id }}">
+  <div class="zone-head"><div><span class="eyebrow">AREA {{ '%02d'|format(loop.index) }} / {{ kind|replace('_',' ') }}</span><h2 id="room-title-{{ group.space.id }}">{{ group.space.name }}</h2><p>{{ group.count }} {{ 'reservable room' if kind=='STUDY_ROOM' else 'individual bookable units' }} · {{ group.space.opens_at }}–{{ group.space.closes_at }} · Example weekdays · Asia/Baku</p></div><span class="zone-hours">{{ 'Staff approval' if kind in ('COMPUTER_LAB','STUDY_ROOM') else 'Individual booking' }}</span></div>
+  <div class="room-plan room-plan--{{ kind|lower|replace('_','-') }}" role="group" aria-label="EXAMPLE LAYOUT, NOT TO SCALE, for {{ group.space.name }}">
+    <div class="room-plan__topline"><span>EXAMPLE LAYOUT · NOT TO SCALE</span><span>{{ 'WHITEBOARD / TEACHER' if kind=='COMPUTER_LAB' else 'WINDOW SIDE' if kind!='STUDY_ROOM' else 'GLASS WALL / LIGHT' }}</span></div>
+    <div class="room-plan__walls">
+      <span class="room-plan__window" aria-hidden="true"></span>
+      {% if kind=='COMPUTER_LAB' %}<div class="room-plan__board" aria-hidden="true">TEACHING SCREEN</div>{% endif %}
+      {% if kind=='STUDY_ROOM' %}
+        <div class="room-plan__group-room">
+          <div class="room-plan__group-table" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><span>6 PERSON TABLE</span></div>
+          {% for point in group.points %}
+          <a class="aztu-seat room-plan__whole-room state-{{ point.status.state|lower }}" data-resource-id="{{ point.resource.id }}" data-state="{{ point.status.state }}" href="{{ url_for('resource_detail',resource_id=point.resource.id) }}" aria-label="{{ point.resource.name }}: {{ point.status.state|lower }}. Reserve whole room"><span class="pin-name">{{ point.resource.name }}</span><span data-status-text class="seat-state">{{ {'AVAILABLE':'Available','SOON':'Soon','OCCUPIED':'Booked','CLOSED':'Closed','DISABLED':'Unavailable'}[point.status.state] }}</span><span class="room-plan__book-action">Book entire room ↗</span></a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="room-plan__workstations">
+          <div class="room-plan__bank" aria-label="Left row of {{ 'PCs' if kind!='LIBRARY_SEAT' else 'reading seats' }}">{% for point in group.points[:half] %}{% include 'partials/studio_seat.html' %}{% endfor %}</div>
+          <div class="room-plan__aisle" aria-hidden="true"><span>ACCESS AISLE</span></div>
+          <div class="room-plan__bank" aria-label="Right row of {{ 'PCs' if kind!='LIBRARY_SEAT' else 'reading seats' }}">{% for point in group.points[half:] %}{% include 'partials/studio_seat.html' %}{% endfor %}</div>
+        </div>
+      {% endif %}
+      <div class="room-plan__door" aria-hidden="true">↥ ENTRANCE</div>
     </div>
-    <div class="aztu-floor-bottom"><span class="floor-entrance">↥ ENTRANCE / CORRIDOR</span><span>Choose a desk to open its reservation form ↗</span></div>
+    <div class="room-plan__bottomline"><span>{{ 'One booking covers the whole room' if kind=='STUDY_ROOM' else 'Each labeled desk can be booked separately' }}</span><span>Select a position to check its schedule ↗</span></div>
   </div>
-  <p class="policy-note">{{ group.space.policy_note }}{% if group.space.kind == 'COMPUTER_LAB' %} Lab computers require staff approval; a teaching timetable may block a slot.{% endif %}</p>
+  <p class="policy-note">{{ group.space.policy_note }}{% if kind=='COMPUTER_LAB' %} A teaching timetable may block an entire lab even if a PC is otherwise unused.{% endif %}</p>
 </section>
 {% else %}
-<div class="empty-state"><h2>No sample spaces yet</h2><p>Run <code>python scripts/sync_aztu_demo.py</code> once to add the library and PC seats to your local database.</p></div>
+<div class="empty-state campus-onboarding"><h2>No sample spaces yet</h2><p>This database has no example study rooms. Run <code>python scripts/sync_aztu_demo.py</code> or restart the local demo to load the sample campus safely.</p></div>
 {% endfor %}
-<div class="availability-footnote">Colors represent <strong>confirmed reservation status</strong>, not measured physical occupancy. A different confirmed booking you own may also prevent an overlapping second seat. Booking checks validate opening hours, teaching closures and capacity again. <span id="refresh-note" aria-live="polite">Auto-refresh every 30 seconds</span></div>
-<script src="{{ url_for('static', filename='studio.js') }}" defer></script>
+<div class="availability-footnote">Colors reflect <strong>confirmed reservations and opening-hour rules</strong>, never physical occupancy. Your own overlapping booking can also block another seat. <span id="refresh-note" aria-live="polite">Auto-refresh every 30 seconds</span></div>
+<script src="{{ url_for('static',filename='studio.js') }}" defer></script>
 {% endblock %}

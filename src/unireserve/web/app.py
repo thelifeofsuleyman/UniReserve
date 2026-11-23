@@ -25,7 +25,7 @@ from unireserve.services.booking import (
 )
 from unireserve.storage.accounts import verify_password
 from unireserve.storage.db import create_schema, make_engine
-from unireserve.storage.models import User
+from unireserve.storage.models import User, Space
 
 
 BASE_DIR = Path(__file__).resolve().parents[3]
@@ -42,15 +42,27 @@ def create_app(test_config: dict | None = None) -> Flask:
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=False,  # local http://127.0.0.1 demonstration only
         MAX_CONTENT_LENGTH=64 * 1024,
+        AUTO_SAMPLE_CATALOG=None,  # explicitly enabled by the local demo launcher only
     )
     if test_config is not None:
         app.config.update(test_config)
+    if app.config["AUTO_SAMPLE_CATALOG"] is None:
+        app.config["AUTO_SAMPLE_CATALOG"] = os.environ.get("UNIRESERVE_AUTO_SAMPLE_CATALOG", "0") == "1"
     try:
         display_zone = ZoneInfo(app.config["DISPLAY_TIMEZONE"])
     except ZoneInfoNotFoundError as exc:
         raise RuntimeError("Invalid UNIRESERVE_TIMEZONE; install tzdata if required") from exc
     engine = make_engine(app.config["DB_PATH"])
     create_schema(engine)
+    # CR-004: local demo entry point opts into a one-time idempotent sample sync.
+    # Existing bookings, users, audit events and admin-created resources persist.
+    # API/test factories do not auto-seed unless explicitly configured.
+    if app.config["AUTO_SAMPLE_CATALOG"]:
+        from unireserve.storage.aztu_demo import sync_demo_catalog
+        with Session(engine) as db:
+            missing_demo_areas = db.scalar(select(Space.id).limit(1)) is None
+        if missing_demo_areas:
+            sync_demo_catalog(engine)
     service = BookingService(engine)
     app.extensions["unireserve_engine"] = engine
 
@@ -190,12 +202,19 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.context_processor
     def image_and_status_helpers():
         def resource_photo(resource):
-            name = (resource.name + " " + resource.public_code).casefold()
-            if "pc" in name or "workstation" in name or "computer" in name:
-                return "photo-lab"
-            if "reading" in name or "seat" in name:
-                return "photo-library"
-            return "photo-study"
+            code = resource.public_code.upper()
+            # Match a photograph to the actual demo bookable area, not to
+            # generic "ROOM" or "EQUIPMENT" database categories.
+            for prefix, css in (
+                ("AZ-LS-", "photo-library-seats"),
+                ("AZ-LP-", "photo-library-pcs"),
+                ("AZ-CP-", "photo-teaching-lab"),
+                ("AZ-GR-", "photo-group-study"),
+            ):
+                if code.startswith(prefix):
+                    return css
+            name = (resource.name + " " + code).casefold()
+            return "photo-lab" if any(word in name for word in ("pc", "workstation", "computer")) else "photo-study"
         return {"resource_photo": resource_photo, "display_status": display_status}
 
     def studio_groups(resources, spaces, statuses):
@@ -205,12 +224,12 @@ def create_app(test_config: dict | None = None) -> Flask:
             items = sorted((r for r in resources if r.space_id == space.id), key=lambda r: r.public_code)
             if not items:
                 continue
-            points = []
-            # Four across, repeated rows: positions represent only a demo schematic.
-            for i, resource in enumerate(items):
-                col, row = i % 4, i // 4
-                points.append({"resource": resource, "x": 14 + 24 * col,
-                               "y": 22 + row * 31, "status": statuses[resource.id]})
+            # Visual template arranges units into two desk banks with an aisle.
+            # Physical positions are an explicit demo design, not surveyed AzTU data.
+            points = [
+                {"resource": resource, "status": statuses[resource.id]}
+                for resource in items
+            ]
             groups.append({"space": space, "points": points, "count": len(items)})
         return groups
 
@@ -261,11 +280,23 @@ def create_app(test_config: dict | None = None) -> Flask:
         visible = [r for r in records if matches_category(r)
                    and (not term or term.casefold() in (r.name + " " + r.public_code).casefold())]
         statuses = service.status_overview(actor_id())
+        area_images = {
+            "LIBRARY_SEAT": "library-seats.jpg",
+            "LIBRARY_PC": "library-pcs.jpg",
+            "COMPUTER_LAB": "teaching-lab.jpg",
+            "STUDY_ROOM": "group-study.jpg",
+        }
+        area_cards = [
+            {"space": space, "count": sum(r.space_id == space.id for r in visible)}
+            for space in spaces.values()
+            if any(r.space_id == space.id for r in visible)
+        ]
         return render_template("resources.html", page_title="Explore resources", resources=visible, statuses=statuses,
                                category=category, term=term, total=len(records),
                                room_count=sum(r.category == "ROOM" for r in records),
                                equipment_count=sum(r.category == "EQUIPMENT" for r in records),
-                               spaces=spaces, space_count=len(spaces))
+                               spaces=spaces, space_count=len(spaces),
+                               area_cards=area_cards, area_images=area_images)
 
     @app.get("/resources/<int:resource_id>")
     @login_required

@@ -1,13 +1,56 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="editorial-hero aztu-hero"><div class="hero-type"><span class="eyebrow">AzTU / STUDY SPACES</span><h1>Find your <em>seat.</em><br>Make time to focus.</h1><p>Choose an individual library desk, a library computer, a teaching lab workstation or a group study room. No irrelevant rental gear.</p><div class="hero-buttons"><a class="button primary" href="{{ url_for('studio') }}">Open 2D seat map ↗</a><span class="hero-caption">Demonstration inventory · Asia/Baku</span></div></div><div class="hero-photo aztu-campus-photo" role="img" aria-label="Example of AzTU computer laboratory"></div></div>
-<div class="reference-credit">Illustrative imagery created for the prototype, not photographs of verified AzTU rooms. <a href="https://aztu.edu.az/az/page/kampus-202" target="_blank" rel="noopener noreferrer">AzTU campus reference</a> · Inventory is sample data.</div>
-<div class="section-heading catalogue-heading"><div><span class="eyebrow">01 / SEATS AND WORKSTATIONS</span><h2>Book a place, not equipment<span class="title-spark">.</span></h2><p>All resources represent one reservable seat, PC or study space. Only confirmed reservations block a spot.</p></div><a class="text-link studio-link" href="{{ url_for('studio') }}">View room layout ↗</a></div>
-<div class="compact-stats" aria-label="Resource summary"><span><strong>{{ total }}</strong> bookable units</span><span><strong>{{ space_count }}</strong> example areas</span><span class="compact-stats-note">Monday–Friday example hours; lab schedule may differ in reality</span></div>
-<form class="filter-bar" action="{{ url_for('resources') }}" method="get"><label for="q" class="sr-only">Search seats and computers</label><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" value="{{ term }}" placeholder="Find a library seat, PC or group room..."></div><label for="category" class="sr-only">Resource category</label><select name="category" id="category"><option value="ALL" {{ 'selected' if category=='ALL' else '' }}>All spaces</option><option value="SEAT" {{ 'selected' if category=='SEAT' else '' }}>Library seats</option><option value="PC" {{ 'selected' if category=='PC' else '' }}>All computers</option><option value="LAB" {{ 'selected' if category=='LAB' else '' }}>Teaching lab PCs</option><option value="STUDY" {{ 'selected' if category=='STUDY' else '' }}>Study rooms</option></select><button class="button dark" type="submit">Filter</button></form>
-{% if resources %}<div class="resource-grid editorial-grid">{% for resource in resources %}{% set status=statuses[resource.id] %}{% set area=spaces.get(resource.space_id) %}
-<article class="resource-card editorial-card"><div class="resource-photo card-photo {{ resource_photo(resource) }}" role="img" aria-label="Illustrative photo associated with {{ resource.name }}"><span class="photo-index">{{ '%02d'|format(loop.index) }} / {{ area.kind|replace('_',' ') if area else resource.category }}</span><a href="{{ url_for('resource_detail',resource_id=resource.id) }}" class="photo-explore" aria-label="Details for {{ resource.name }}">↗</a></div><div class="resource-card-body"><div class="card-meta"><span class="code-label">{{ resource.public_code }}</span><span class="signal-pill signal-{{ status.state|lower }}" data-resource-id="{{ resource.id }}" data-state="{{ status.state }}"><span class="signal-dot"></span><span class="signal-label" data-status-text>{{ {'AVAILABLE':'Available','SOON':'Starting soon','OCCUPIED':'Booked now','CLOSED':'Closed hours','DISABLED':'Unavailable'}[status.state] }}</span></span></div><h3>{{ resource.name }}</h3><p>{{ area.name if area else 'Unassigned demonstration resource' }}</p><div class="card-bottom"><span class="approval-note">{{ ('%s–%s · '%(area.opens_at, area.closes_at)) if area else '' }}{{ 'Approval required' if resource.requires_approval else 'Instant booking' }}</span><a class="card-action" href="{{ url_for('resource_detail',resource_id=resource.id) }}">Select ↗</a></div></div></article>
-{% endfor %}</div>{% else %}<div class="empty-state"><h3>No matching seats</h3><p>Try another filter or run the local AzTU demo catalogue sync.</p><a href="{{ url_for('resources') }}" class="button dark">Reset</a></div>{% endif %}
-<div class="availability-footnote"><strong>Before you reserve:</strong> badges show global availability <em>right now</em>, not whether every future time is open or whether you already hold a booking. Use each seat’s detail page to check a specific time. Example areas and booking entitlements are simulated. <a href="{{ url_for('studio') }}">See interactive 2D map</a>.</div>
-<script src="{{ url_for('static', filename='studio.js') }}" defer></script>
+<section class="campus-hero" aria-labelledby="catalogue-title">
+  <div class="campus-hero__copy">
+    <span class="eyebrow">UniReserve / AzTU-inspired demonstration</span>
+    <h1 id="catalogue-title">Your next quiet place <em>starts here.</em></h1>
+    <p>Choose a study zone first, then select a specific desk or computer. The seat map shows every bookable position, with availability from confirmed reservations.</p>
+    <div class="campus-hero__actions"><a class="button primary" href="{{ url_for('studio') }}">Explore the seat map <span aria-hidden="true">↗</span></a><span>4 example areas · Asia/Baku</span></div>
+  </div>
+  <div class="campus-hero__visual"><img src="{{ url_for('static',filename='teaching-lab.jpg') }}" alt="Illustrative university teaching computer lab with an aisle and orderly PC desks"><span>DESIGNED FOR YOUR STUDY DAY</span></div>
+</section>
+<div class="campus-note" role="note"><span aria-hidden="true">ⓘ</span><p><strong>Example campus, real booking rules.</strong> The illustrations, room layouts, seat numbers and lab access policies are proposed for this coursework prototype, not verified photographs or official seating plans of AzTU. Existing bookings are preserved.</p></div>
+
+<section class="campus-section" aria-labelledby="zones-heading">
+  <div class="section-heading"><div><span class="eyebrow">01 / BOOKABLE ZONES</span><h2 id="zones-heading">First, choose your space.</h2><p>Different rooms, different layouts. No unrelated equipment catalogue.</p></div><a class="text-link" href="{{ url_for('studio') }}">Open full room layout ↗</a></div>
+  {% if area_cards %}
+  <div class="campus-zones">
+  {% for entry in area_cards %}{% set area=entry.space %}
+    <article class="campus-zone-card campus-zone-card--{{ area.kind|lower|replace('_','-') }}">
+      <a class="campus-zone-card__picture" href="{{ url_for('studio',area=area.id) }}" aria-label="See layout for {{ area.name }}">
+        <img src="{{ url_for('static',filename=area_images.get(area.kind,'group-study.jpg')) }}" loading="{{ 'eager' if loop.index <= 2 else 'lazy' }}" alt="Illustrative {{ area.kind|lower|replace('_',' ') }} interior matching this study zone">
+        <span class="campus-zone-card__number">ZONE {{ '%02d'|format(loop.index) }}</span>
+      </a>
+      <div class="campus-zone-card__body">
+        <div class="campus-zone-card__meta"><span>{{ area.kind|replace('_',' ')|title }}</span><span>{{ entry.count }} {{ 'space' if entry.count == 1 else 'individual spots' }}</span></div>
+        <h3>{{ area.name|replace(' (demo)','')|replace(' (sample)','') }}</h3>
+        <p>{{ 'Reserve the whole group room.' if area.kind == 'STUDY_ROOM' else 'Choose your individual seat or workstation inside.' }}</p>
+        <div class="campus-zone-card__foot"><span aria-label="Example opening hours">◷ {{ area.opens_at }}–{{ area.closes_at }}</span><a href="{{ url_for('studio',area=area.id) }}">View layout <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </article>
+  {% endfor %}
+  </div>
+  {% elif not resources %}
+  <div class="empty-state"><h3>No matching areas or seats</h3><p>Try clearing the filters. Your demo catalogue can also be reloaded using <code>python scripts/sync_aztu_demo.py</code>.</p></div>
+  {% endif %}
+</section>
+
+<section class="campus-section campus-directory" aria-labelledby="units-heading">
+  <div class="section-heading"><div><span class="eyebrow">02 / INDIVIDUAL UNITS</span><h2 id="units-heading">Find an exact seat or PC.</h2><p>Each listing is one reservation unit, not the whole laboratory.</p></div><span class="campus-count">{{ resources|length }} matching units</span></div>
+  <form class="filter-bar" action="{{ url_for('resources') }}" method="get"><label for="q" class="sr-only">Search seats and PCs</label><div class="search-field"><span aria-hidden="true">⌕</span><input id="q" name="q" type="search" value="{{ term }}" placeholder="Search by seat name or number…"></div><label for="category" class="sr-only">Unit category</label><select name="category" id="category"><option value="ALL" {{ 'selected' if category=='ALL' else '' }}>All types</option><option value="SEAT" {{ 'selected' if category=='SEAT' else '' }}>Reading desks</option><option value="PC" {{ 'selected' if category=='PC' else '' }}>All PCs</option><option value="LAB" {{ 'selected' if category=='LAB' else '' }}>Teaching lab PCs</option><option value="STUDY" {{ 'selected' if category=='STUDY' else '' }}>Group room</option><option value="ROOM" {{ 'selected' if category=='ROOM' else '' }}>Rooms</option><option value="EQUIPMENT" {{ 'selected' if category=='EQUIPMENT' else '' }}>Legacy equipment</option></select><button class="button dark" type="submit">Apply filter</button></form>
+  {% if resources %}
+  <div class="campus-units">
+  {% for resource in resources %}{% set state=statuses[resource.id] %}{% set area=spaces.get(resource.space_id) %}
+  <a class="campus-unit" href="{{ url_for('resource_detail',resource_id=resource.id) }}" aria-label="Reserve or inspect {{ resource.name }}">
+    <span class="campus-unit__icon" aria-hidden="true">{{ '▣' if area and area.kind in ('LIBRARY_PC','COMPUTER_LAB') else '▤' if area and area.kind == 'LIBRARY_SEAT' else '⌂' }}</span>
+    <span class="campus-unit__details"><strong>{{ resource.name }}</strong><small>{{ area.name|replace(' (demo)','')|replace(' (sample)','') if area else 'Legacy standalone resource' }} · {{ resource.public_code }}</small></span>
+    <span class="signal-pill signal-{{ state.state|lower }}" data-resource-id="{{ resource.id }}" data-state="{{ state.state }}"><span class="signal-dot"></span><span data-status-text>{{ {'AVAILABLE':'Available','SOON':'Starting soon','OCCUPIED':'Booked now','CLOSED':'Closed hours','DISABLED':'Unavailable'}[state.state] }}</span></span>
+    <span class="campus-unit__arrow" aria-hidden="true">↗</span>
+  </a>
+  {% endfor %}
+  </div>
+  {% else %}<div class="empty-state"><h3>No matching units</h3><p>Try another search or <a href="{{ url_for('resources') }}">clear filters</a>.</p></div>{% endif %}
+</section>
+<div class="availability-footnote"><strong>Availability is time-specific.</strong> A green badge means available at the last status check, not a guaranteed future booking. Open a seat to validate your selected time against confirmed bookings, opening hours, and class closures.</div>
+<script src="{{ url_for('static',filename='studio.js') }}" defer></script>
 {% endblock %}
