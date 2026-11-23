@@ -1,5 +1,5 @@
 # ADR-0002 — Transactional booking and approval
-**Status:** Accepted for design; implementation and integration tests pending  
+**Status:** Implemented and verified by booking/approval integration tests  
 **Date:** 2026-11-23  
 **Related requirements:** FR-003/004/005/007/008/010/011; BR-01/02/05/06/07/08.
 
@@ -21,4 +21,4 @@ Use half-open UTC intervals; persist all reservation state and audit-event chang
 - Adjacent intervals are allowed.
 
 ## Verification plan
-Run boundary-value tests, decision-table role/status tests, two-client race tests repeated at least 50 times, and rollback-on-failure tests. Report successes/failures honestly. The first implementation milestone only contains a pure interval overlap function, not transactional enforcement.
+Run boundary-value tests, decision-table role/status tests, two-client race tests repeated at least 50 times, and rollback-on-failure tests. Report successes/failures honestly. The evaluated implementation now uses `write_transaction()` with `BEGIN IMMEDIATE` and includes 50 repeated two-client race tests. See QA report and the design/code deviation notes in `docs/traceability/MATRIX.md`.

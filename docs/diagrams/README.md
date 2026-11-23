@@ -21,6 +21,7 @@ All diagram sources are in [source](source/) as **PlantUML .puml** files. [Rende
 | Sequence: UC-04 | [11](source/11-seq-UC-04-cancel.puml) | Ownership and start-time checks before cancellation; rollback on invalid transition. |
 | Sequence: UC-05 | [12](source/12-seq-UC-05-approve.puml) | Admin decision, stale request/conflict alternatives and availability recheck before confirmation. |
 | Sequence: UC-06 | [13](source/13-seq-UC-06-resources.puml) | Administrator resource operations with validation and forbidden-role alternative. |
+| Supplementary CR-001 | [14](source/14-seq-CR-001-studio.puml) | Authenticated read-only near-live 2D status view; no booking lock or physical occupancy sensor. |
 
 ## Design consistency decisions
 - **Half-open intervals:** `start < other.end && other.start < end`, so adjacent bookings do not conflict; see BR-01/BR-02 and the tested `TimeWindow` value object.
@@ -29,7 +30,7 @@ All diagram sources are in [source](source/) as **PlantUML .puml** files. [Rende
 - **No post-start cancellation in v1:** UC-04 and the state diagram match BR-08.
 - **Exactly one resource/user per reservation:** Stored as `user_id` and `resource_id` FKs, with multiple events through `reservation_id`.
 - **Permission boundaries:** Ordinary users cannot approve or edit inventory. Domain/service authorization is authoritative; UI hiding is not an access-control mechanism.
-- **Design-to-code honesty:** Only interval validation and its initial tests exist so far. Services, repositories, schema and other modules are **planned** and must be implemented and verified later.
+- **Design-to-code honesty:** The current Flask/SQLAlchemy application implements booking services, state transitions, session checks and audit events. Repository interfaces and AuthService shown in design class diagrams are conceptual; the production prototype uses SQLAlchemy Sessions directly and Flask login routes. See `docs/traceability/MATRIX.md` for explicit deviations.
 
 ## 3NF argument
 The logical design uses four tables: `users`, `resources`, `reservations`, and `reservation_events`. Each table has one surrogate primary key and stores facts about that entity only. Attributes such as a user's email and a resource's name are kept in their own tables, not copied into reservations or events. Every non-key field depends on its whole primary key, without a transitive dependency via another non-key attribute. `users.email` and `resources.public_code` are additional unique candidate identifiers. Audit events reference both the reservation and actor through separate foreign keys. These structures are designed to satisfy **third normal form (3NF)**; it must be verified against the implemented SQL schema.
@@ -53,3 +54,7 @@ A small local Flask + SQLAlchemy + SQLite monolith is appropriate for one develo
 
 ## Limitations
 The requirement policies are reasoned assumptions, not evidence from university stakeholders. This work is an engineering design baseline and does not imply every feature has been implemented.
+
+## Change request CR-001 and implemented status view
+
+The supplementary sequence [14](source/14-seq-CR-001-studio.puml) links the authenticated Studio to `BookingService.status_overview()`, confirmed-booking queries and `current_status` domain logic. The color-coded 15-minute status is calculated from stored confirmations rather than sensors; sample map coordinates are display-only and deliberately **not** in the 3NF ERD. See `docs/change-management/CR-001-visual-availability.md` and the traceability matrix.

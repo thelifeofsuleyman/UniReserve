@@ -110,3 +110,7 @@ See the [UI review notes](docs/ui/M55_VISUAL_REVIEW.md) and [owner feedback log]
 ## Milestone 6: Formal test and coverage evidence
 
 The test package includes a [formal test plan](docs/testing/TEST_PLAN.md), [traceable test cases](docs/testing/TEST_CASES.md), [verified CI test report](docs/testing/M6_TEST_REPORT.md), [measured performance report](docs/testing/M6_PERFORMANCE_REPORT.md) and [defect log](docs/testing/DEFECT_LOG.md). Run `python scripts/measure_latency.py` to repeat the NFR-001 200-request probe. This does **not** claim full user-study or keyboard-accessibility verification; those require real manual sessions and are explicitly marked unmeasured.
+
+## Milestone 7: Traceability and design reconciliation
+
+[Requirement-to-design-to-code-to-test matrix](docs/traceability/MATRIX.md) maps all 11 Must functional requirements to use cases, PlantUML models, real files and verified CI tests. The supplementary [CR-001 sequence](docs/diagrams/source/14-seq-CR-001-studio.puml) documents the new Studio status API. Known differences between conceptual design patterns and the implementation are disclosed; physical checkout and quota extensions remain deferred, and human usability/accessibility measurements remain open.

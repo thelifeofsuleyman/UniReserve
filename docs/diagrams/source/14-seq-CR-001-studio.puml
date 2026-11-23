@@ -1,0 +1,30 @@
+@startuml
+title CR-001 - Live 2D studio availability snapshot
+actor "Authenticated Student / Staff / Admin" as U
+participant "Flask Studio Routes" as R
+participant "BookingService" as S
+participant "Domain current_status" as D
+database "SQLite Reservation / Resource" as DB
+U -> R : GET /studio
+R -> S : status_overview(session.user.id)
+S -> DB : SELECT resources and CONFIRMED reservations with end > now
+DB --> S : enabled flags + time windows
+loop each resource
+ S -> D : current_status(enabled, confirmed windows, now)
+ D --> S : AVAILABLE / SOON / OCCUPIED / DISABLED
+end
+S --> R : read-only states, no owner details
+R --> U : clickable illustrative 2D map + words and colors
+loop every 30 seconds
+ U -> R : GET /api/availability-status
+ R -> S : status_overview(authenticated actor)
+ S -> DB : SELECT confirmed current/future intervals
+ DB --> S : intervals, no requester identities
+ S --> U : no-store JSON; update status labels
+end
+note over U,DB
+  No physical occupancy sensor or surveyed floor coordinates.
+  SOON when next confirmation starts within 15 min.
+  Booking still rechecks conflict inside BEGIN IMMEDIATE.
+end note
+@enduml

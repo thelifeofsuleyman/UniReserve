@@ -2,7 +2,7 @@ name: Validate and export architecture diagrams
 
 on:
   push:
-    branches: [design/uml-architecture]
+    branches: [design/uml-architecture, process/traceability]
     paths:
       - 'docs/diagrams/source/**'
       - 'docs/diagrams/README.md'
@@ -40,7 +40,7 @@ jobs:
           from pathlib import Path
           sources=list(Path("docs/diagrams/source").glob("*.puml"))
           exports=Path("docs/diagrams/rendered")
-          assert len(sources)==13, len(sources)
+          assert len(sources)==14, len(sources)
           for source in sources:
               for ext in (".svg",".png"):
                   target=exports / (source.stem+ext)
@@ -50,7 +50,7 @@ jobs:
           print(f"Rendered and inspected {len(sources)} diagrams to PNG+SVG.")
           PY
       - name: Publish exported diagram images to branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/design/uml-architecture'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/process/traceability'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

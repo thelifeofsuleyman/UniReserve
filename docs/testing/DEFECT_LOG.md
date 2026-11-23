@@ -8,6 +8,8 @@
 | UX-001 | Usability/design gap | Medium (visual clarity and engagement) | Owner stated that the original functional UI had no pictures and felt too generic; proposed 2D/3D placement and green/yellow/red statuses. | Previous UI represented resources with abstract glyph cards and lacked at-a-glance current status. | CR-001 introduces original imagery, clickable 2D resource studio, current/15-min status API and automated boundary tests. Owner review of the revised UI is still pending. | Implemented; awaiting owner acceptance |
 | TOOL-001 | Development environment limitation | Low (test evidence workflow) | Local browser preview attempts returned `ERR_BLOCKED_BY_ADMINISTRATOR`; local container had no Flask package or network access to install it. | Hosted development execution restrictions, not an error in UniReserve itself. | Full Flask tests and coverage executed on GitHub Actions Ubuntu/Python 3.11. Do not claim local UI screenshot run from this environment. | Mitigated through CI |
 
+| DOC-001 | Traceability/document mismatch | Low (reporting precision) | GitHub Actions 45104488696: FR-010 claimed coverage by TC-013, but that case was filed under FR-006 only. | Matrix linked a test without a corresponding requirement ID in the case catalogue. | Removed the unsupported FR-010→TC-013 link, retaining other actual FR-010 tests. Re-run CI and traceability checker. | Fixed; re-verification pending |
+
 ## Functional defects observed so far
 
 None confirmed in the verified test runs to date. It would be misleading to invent a database or authorization bug just to populate this log. If a future test finds a bug, record its reproduction, severity, expected/actual behavior, root cause, fixing commit and re-test link before marking it resolved.
