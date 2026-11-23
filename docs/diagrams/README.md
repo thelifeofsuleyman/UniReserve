@@ -58,3 +58,8 @@ The requirement policies are reasoned assumptions, not evidence from university 
 ## Change request CR-001 and implemented status view
 
 The supplementary sequence [14](source/14-seq-CR-001-studio.puml) links the authenticated Studio to `BookingService.status_overview()`, confirmed-booking queries and `current_status` domain logic. The color-coded 15-minute status is calculated from stored confirmations rather than sensors; sample map coordinates are display-only and deliberately **not** in the 3NF ERD. See `docs/change-management/CR-001-visual-availability.md` and the traceability matrix.
+
+
+## CR-002 — AzTU-based study space and PC seat extension
+
+The original [logical 3NF ERD](source/05-erd-logical-3nf.puml) describes the four-table booking baseline. A supplementary [space/closure ERD](source/15-aztu-space-extension.puml) adds the normalized Space and SpaceClosure tables, nullable Resource.space_id and Resource.is_listed. [Booking hours sequence](source/16-aztu-booking-hours-sequence.puml) demonstrates server-side weekday/hours/closure checks before transactional confirmation. The live code must be verified with the CR-002 tests; illustrative desk layout is not a surveyed campus plan. The extension preserves existing reservation history. Published office hours are not blanket teaching-lab schedules; sample areas are demo data.

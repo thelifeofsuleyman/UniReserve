@@ -1,0 +1,61 @@
+@startuml
+title CR-002 - Campus Booking Spaces and Seat/PC Units (3NF extension)
+skinparam shadowing false
+hide circle
+entity "spaces" as S {
+  * id : INTEGER <<PK>>
+  --
+  * public_code : VARCHAR(40) <<UNIQUE>>
+  * name : VARCHAR(120)
+  * kind : VARCHAR(30)
+  * opens_at : CHAR(5)
+  * closes_at : CHAR(5)
+  * open_days : INTEGER
+  * policy_note : VARCHAR(240)
+  * is_enabled : BOOLEAN
+}
+entity "resources (existing 3NF table)" as R {
+  * id : INTEGER <<PK>>
+  --
+  * public_code : VARCHAR(40) <<UNIQUE>>
+  * name : VARCHAR(120)
+  * category : VARCHAR(20)
+  * requires_approval : BOOLEAN
+  * is_enabled : BOOLEAN
+  space_id : INTEGER <<FK NULL>>
+  * is_listed : BOOLEAN
+}
+entity "space_closures" as C {
+  * id : INTEGER <<PK>>
+  --
+  * space_id : INTEGER <<FK>>
+  * start_utc : TIMESTAMP
+  * end_utc : TIMESTAMP
+  * reason : VARCHAR(160)
+}
+entity "reservations (existing)" as B {
+  * id : INTEGER <<PK>>
+  --
+  * resource_id : INTEGER <<FK>>
+  * user_id : INTEGER <<FK>>
+  * start_utc : TIMESTAMP
+  * end_utc : TIMESTAMP
+  * status : VARCHAR(30)
+}
+S ||--o{ R : hosts
+S ||--o{ C : blocked during
+R ||--o{ B : individually booked
+note right of S
+  Areas and their opening policies are sample data.
+  open_days is a scalar 7-bit weekday mask.
+  Days are not stored as a repeating text list.
+end note
+note right of C
+  All resources in a space share its closures.
+  Approval rechecks closures transactionally.
+end note
+note bottom of R
+  Historical gear is hidden with is_listed = false.
+  Never delete reservations or their resource FK.
+end note
+@enduml

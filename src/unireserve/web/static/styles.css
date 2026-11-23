@@ -16,3 +16,37 @@ body{font-family:'DM Sans',system-ui,sans-serif;letter-spacing:-.012em}.brand-ma
 @media(max-width:800px){.editorial-hero{grid-template-columns:1fr}.hero-photo{min-height:230px}.studio-heading{flex-direction:column;align-items:start}.plan-areas{grid-template-columns:1fr}.zone-surface{height:350px;min-height:350px}.studio-plan{min-height:auto}.plan-areas{min-height:0}.studio-side{display:block}.studio-directory{max-height:300px}.map-pin{max-width:33%}}
 @media(max-width:620px){.nav-list{grid-template-columns:repeat(4,minmax(0,1fr))}.nav-live{display:none}.editorial-hero{border-radius:9px}.hero-type{padding:28px}.hero-type h1{font-size:39px}.hero-photo{min-height:180px}.resource-card .card-photo{height:225px}.compact-stats-note{margin-left:0}.signal-legend{gap:5px}.signal-legend>span{font-size:9px;padding:7px}.studio-plan{padding:12px}.plan-meta,.plan-foot{font-size:8px}.plan-zone{padding:30px 6px 8px}.map-pin{max-width:42%;min-width:87px;padding:5px}.map-pin .pin-name{font-size:9px}.zone-surface{height:280px;min-height:280px}.login-hero .login-photo{inset:15% 6% 18% 6%}.curated-login .login-hero-copy{padding:15px;margin:80px 0 4px}}
 @media(prefers-reduced-motion:reduce){.map-pin,.resource-card,.button{transition:none!important}}
+
+/* CR-002: AzTU-inspired seat and computer-zone interface. Entire map is a demo. */
+.aztu-intro {display:flex;gap:1rem;justify-content:space-between;align-items:flex-start;margin:1.5rem 0 1rem}
+.aztu-intro h1 {font-size:clamp(2.2rem,5vw,4rem);line-height:1.04;letter-spacing:-.045em;margin:.5rem 0}
+.aztu-intro p {max-width:36rem;color:#5c687a;line-height:1.6}
+.aztu-context {padding:1rem 1.2rem;border:1px solid #e2e7ef;border-radius:1rem;background:#f7f9fc;color:#455468;margin:1rem 0;line-height:1.6}
+.aztu-context a {color:#22509f;text-decoration:underline}
+.aztu-zone-wrap {margin:2rem 0 2.6rem}
+.zone-head {display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin-bottom:1rem}
+.zone-head h2 {font-size:clamp(1.35rem,3vw,1.9rem);margin:.4rem 0}
+.zone-head p {font-size:.91rem;color:#667286}
+.zone-hours {background:#eff4fe;color:#355795;padding:.5rem .8rem;border-radius:2rem;font-size:.78rem;white-space:nowrap}
+.aztu-floor {background:linear-gradient(135deg,#e9eef3,#f8fafc);border:1px solid #d5dde6;border-radius:1.25rem;padding:1rem;overflow:hidden;box-shadow:0 12px 35px rgba(21,37,64,.06)}
+.aztu-floor-top,.aztu-floor-bottom {display:flex;justify-content:space-between;gap:1rem;letter-spacing:.1em;text-transform:uppercase;font-size:.68rem;color:#61738e;font-weight:700}
+.aztu-floor-grid {position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;min-height:12rem;margin:1rem 0;padding:1.6rem;border:4px solid #c3ceda;border-radius:.75rem;background:repeating-linear-gradient(0deg,#f3f5f8 0,#f3f5f8 29px,#e9edf2 30px),linear-gradient(#f8faff,#f0f4fa)}
+.aztu-floor-grid:before {content:'';position:absolute;top:-4px;left:17%;width:30%;height:4px;background:#95b5cf}
+.aztu-seat {position:relative;display:flex;flex-direction:column;align-items:center;gap:.35rem;justify-content:center;min-height:105px;padding:.75rem .3rem;border-radius:.8rem;background:#fff;border:2px solid #7fa5aa;text-align:center;text-decoration:none;color:#18334a;box-shadow:0 4px 0 rgba(27,40,65,.09),0 9px 15px rgba(27,40,65,.05);transition:transform .15s,box-shadow .15s}
+.aztu-seat:hover,.aztu-seat:focus-visible {transform:translateY(-4px);box-shadow:0 8px 20px rgba(27,40,65,.15);outline:2px solid #123b7a;outline-offset:2px}
+.aztu-seat .seat-desktop {font-size:1.55rem;line-height:1.2}
+.aztu-seat .pin-name {font-size:.83rem;font-weight:750;line-height:1.2}
+.aztu-seat .seat-state {font-size:.7rem;font-weight:750;text-transform:uppercase;letter-spacing:.02em}
+.aztu-seat.state-available {border-color:#2ca97a;background:#f0fff9}
+.aztu-seat.state-soon {border-color:#deb64d;background:#fffbee}
+.aztu-seat.state-occupied {border-color:#db6a6a;background:#fff2f2}
+.aztu-seat.state-closed {border-color:#8a96aa;background:#f4f6fa}
+.aztu-seat.state-disabled {border-color:#9ba3aa;opacity:.55}
+.signal-dot.closed,.signal-closed .signal-dot{background:#7c8a9e!important}
+.signal-closed{color:#566477!important;background:#eef0f5!important}
+.policy-note {font-size:.85rem;color:#667286;margin-top:.8rem}
+.aztu-hero .hero-photo,.photo-library,.photo-lab{background-position:center;background-size:cover}
+.aztu-campus-photo,.photo-lab {background-image:linear-gradient(90deg,rgba(17,27,49,.12),rgba(17,27,49,.04)),url('https://www.aztu.edu.az/web_admin/upload/files/aztu.edu.az/menus/5-2024/IMG_7183.jpg'),url('resource-editorial.jpg')}
+.photo-library {background-image:linear-gradient(90deg,rgba(17,27,49,.06),rgba(17,27,49,.09)),url('https://images.report.az/photo/6f05901d-10dd-3d62-8be3-2f0f26bc4221_1200.jpg'),url('resource-editorial.jpg')}
+.reference-credit {font-size:.72rem;color:#667286;margin:.35rem 0 1.2rem}
+@media(max-width:850px){.aztu-floor-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:1rem}.zone-head,.aztu-intro{flex-direction:column}.aztu-seat{min-height:115px}.aztu-intro .studio-clock{align-self:flex-start}}

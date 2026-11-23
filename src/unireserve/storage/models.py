@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
 
 class Base(DeclarativeBase):
     pass
+
 
 class User(Base):
     __tablename__ = "users"
@@ -17,6 +19,34 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     __table_args__ = (CheckConstraint("role IN ('STUDENT','STAFF','ADMIN')", name="ck_role"),)
 
+
+class Space(Base):
+    """Physical booking area. Operating times are configurable *demo policies*."""
+    __tablename__ = "spaces"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    public_code: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    kind: Mapped[str] = mapped_column(String(30), nullable=False)
+    opens_at: Mapped[str] = mapped_column(String(5), nullable=False)
+    closes_at: Mapped[str] = mapped_column(String(5), nullable=False)
+    open_days: Mapped[int] = mapped_column(Integer, nullable=False, default=31)
+    policy_note: Mapped[str] = mapped_column(String(240), nullable=False, default="Demo policy; verify locally")
+    is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    __table_args__ = (CheckConstraint("open_days BETWEEN 1 AND 127", name="ck_weekdays_mask"),)
+
+
+class SpaceClosure(Base):
+    """Staff-entered closure (e.g. teaching session or maintenance)."""
+    __tablename__ = "space_closures"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    space_id: Mapped[int] = mapped_column(ForeignKey("spaces.id", ondelete="RESTRICT"), nullable=False)
+    start_utc: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_utc: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    reason: Mapped[str] = mapped_column(String(160), nullable=False)
+    __table_args__ = (CheckConstraint("start_utc < end_utc", name="ck_closure_time_order"),
+                      Index("ix_space_closure_window", "space_id", "start_utc", "end_utc"))
+
+
 class Resource(Base):
     __tablename__ = "resources"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -25,7 +55,10 @@ class Resource(Base):
     category: Mapped[str] = mapped_column(String(20), nullable=False)
     requires_approval: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    space_id: Mapped[int | None] = mapped_column(ForeignKey("spaces.id", ondelete="RESTRICT"), nullable=True)
+    is_listed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     __table_args__ = (CheckConstraint("category IN ('ROOM','EQUIPMENT')", name="ck_resource_category"),)
+
 
 class Reservation(Base):
     __tablename__ = "reservations"
@@ -43,6 +76,7 @@ class Reservation(Base):
         Index("ix_confirmed_resource_window", "resource_id", "status", "start_utc", "end_utc"),
         Index("ix_reservation_owner", "user_id"),
     )
+
 
 class ReservationEvent(Base):
     __tablename__ = "reservation_events"

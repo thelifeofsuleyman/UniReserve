@@ -25,7 +25,7 @@ for name in required:
 for ext in ('puml','png','svg'):
     folder=ROOT/'docs/diagrams'/('source' if ext=='puml' else 'rendered')
     names=list(folder.glob('*.'+ext))
-    assert len(names)==14,f'Expected 14 {ext}, found {len(names)}'
+    assert len(names)==16,f'Expected 16 {ext}, found {len(names)}'
 
 pdfs=[
 '01_Requirements_Specification.pdf','02_Analysis_Design_Models.pdf',
@@ -39,7 +39,7 @@ for pdf in pdfs:
     assert len(reader.pages)>=1,pdf
     texts[pdf]='\n'.join(page.extract_text() or '' for page in reader.pages)
     print(f'PDF verified: {pdf} ({len(reader.pages)} pages)')
-assert len(PdfReader(ROOT/'docs/submission/02_Analysis_Design_Models.pdf').pages)==14
+assert len(PdfReader(ROOT/'docs/submission/02_Analysis_Design_Models.pdf').pages)==16
 assert 1<=len(PdfReader(ROOT/'docs/submission/06_Individual_Reflection_DRAFT.pdf').pages)<=2
 assert all(x in texts[pdfs[0]] for x in ('LibCal','Skedda','FR-001','UC-01')), 'SRS missing required appendices/UCs'
 assert all(x in texts[pdfs[2]] for x in ('TC-001','TC-036','Defect')), 'Test PDF incomplete'
@@ -50,4 +50,4 @@ assert 'AI assistance disclosure' in texts[pdfs[5]], 'Reflection must disclose A
 srs=(ROOT/'docs/requirements/SRS-v1.md').read_text(encoding='utf-8')
 assert len(re.findall(r'^\|\s*FR-\d{3}\s*\|\s*Must\s*\|',srs,re.M))==11
 assert len(re.findall(r'^\|\s*NFR-\d{3}\s*\|',srs,re.M))==8
-print('Final submission structure PASS: 6 PDFs, 14 diagram sources, 28 exports, 11 traced Musts.')
+print('Final submission structure PASS: 6 PDFs, 16 diagram sources, 32 exports, 11 traced Musts.')

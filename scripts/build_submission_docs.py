@@ -210,14 +210,16 @@ DIAGRAM_RATIONALE = [
 'UC-05 admin approval/rejection with stale-state and overlapping-confirmation alternatives.',
 'UC-06 catalogue changes restricted to admin and validated before write.',
 'CR-001 authenticated 2D Studio read-only snapshot/30-second refresh; no physical sensors or surveyed coordinates.',
+'CR-002 normalized Space and SpaceClosure extension for seat-level booking, 7-bit weekday mask, and preserved historical resource FKs.',
+'CR-002 booking/approval rechecks weekday hours, room closure and resource-specific confirmed overlap under a SQLite write transaction.',
 ]
 
 
 def build_models_pdf():
     out=OUT/'02_Analysis_Design_Models.pdf'
     images=sorted((ROOT/'docs/diagrams/rendered').glob('*.png'))
-    if len(images)!=14:
-        raise ValueError(f'Expected 14 rendered model PNGs, got {len(images)}')
+    if len(images)!=16:
+        raise ValueError(f'Expected 16 rendered model PNGs, got {len(images)}')
     cv=canvas.Canvas(str(out),pagesize=landscape(A4))
     W,H=landscape(A4)
     for index,path in enumerate(images):
@@ -254,8 +256,8 @@ def verify():
         if not p.exists() or p.stat().st_size<3000:raise AssertionError(f'Empty PDF {filename}')
         reader=PdfReader(str(p))
         if not reader.pages:raise AssertionError(f'PDF no pages {filename}')
-        if filename=='02_Analysis_Design_Models.pdf' and len(reader.pages)!=14:
-            raise AssertionError(f'Model diagrams PDF should have 14 pages: {len(reader.pages)}')
+        if filename=='02_Analysis_Design_Models.pdf' and len(reader.pages)!=16:
+            raise AssertionError(f'Model diagrams PDF should have 16 pages: {len(reader.pages)}')
         if filename=='06_Individual_Reflection_DRAFT.pdf' and not (1<=len(reader.pages)<=2):
             raise AssertionError(f'Reflection draft must be 1-2 pages: {len(reader.pages)}')
         if filename!='02_Analysis_Design_Models.pdf':
@@ -268,21 +270,25 @@ def main():
     build_markdown_pdf('01_Requirements_Specification.pdf','A / Requirements Specification',[
        ('Core SRS','docs/requirements/SRS-v1.md'),
        ('Six Detailed Use Cases','docs/requirements/USE_CASES-v1.md'),
-       ('Appendix A: Existing Systems — LibCal and Skedda','docs/requirements/EXISTING_SYSTEMS_REVIEW.md')])
+       ('Appendix A: Existing Systems — LibCal and Skedda','docs/requirements/EXISTING_SYSTEMS_REVIEW.md'),
+       ('Appendix B: AzTU-inspired booking change','docs/change-management/CR-002-aztu-seat-reservations.md')])
     build_models_pdf()
     build_markdown_pdf('03_Test_Plan_and_Report.pdf','C / Test Plan and Report',[
        ('Testing Plan','docs/testing/TEST_PLAN.md'),
        ('Executed Test Cases','docs/testing/TEST_CASES.md'),
        ('Verified Testing Report','docs/testing/M6_TEST_REPORT.md'),
        ('Measured Performance Evidence','docs/testing/M6_PERFORMANCE_REPORT.md'),
-       ('Defect Log','docs/testing/DEFECT_LOG.md')])
+       ('Defect Log','docs/testing/DEFECT_LOG.md'),
+       ('AzTU Seat and Timetable Regression','docs/testing/CR-002_TEST_ADDENDUM.md')])
     build_markdown_pdf('04_Traceability_Matrix.pdf','D / Requirements Traceability',[
-       ('Traceability and Explicit Gaps','docs/traceability/MATRIX.md')],landscape_mode=True)
+       ('Traceability and Explicit Gaps','docs/traceability/MATRIX.md'),
+       ('CR-002 Seat and Lab Rule Traces','docs/traceability/CR-002-TRACEABILITY.md')],landscape_mode=True)
     build_markdown_pdf('05_Process_Evidence.pdf','F / Process and Review Evidence',[
        ('Process History','docs/process/PROCESS_EVIDENCE.md'),
        ('Completed Self-Review Checklist','docs/process/SELF_REVIEW_CHECKLIST.md'),
        ('Issue Board','docs/process/ISSUES.md'),
-       ('Owner Feedback and Change Analysis','docs/change-management/CR-001-visual-availability.md')])
+       ('Owner Feedback and Change Analysis','docs/change-management/CR-001-visual-availability.md'),
+       ('CR-002 AzTU Operational Change','docs/change-management/CR-002-aztu-seat-reservations.md')])
     build_markdown_pdf('06_Individual_Reflection_DRAFT.pdf','G / Individual Reflection — Draft for Review',[
        ('Personal Reflection — Draft','docs/reflection/REFLECTION_DRAFT.md')],cover=False,compact=True)
     verify()

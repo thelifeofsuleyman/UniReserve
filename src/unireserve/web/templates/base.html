@@ -14,13 +14,13 @@
     <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>A clearer view of campus.</small></span></a>
     <div class="sidebar-section-label">WORKSPACE</div>
     <nav class="nav-list">
-      <a href="{{ url_for('resources') }}" class="nav-link {{ 'active' if request.endpoint in ('resources', 'resource_detail', 'book', 'check_availability') else '' }}"><span class="nav-icon" aria-hidden="true">◫</span>Explore resources</a>
-      <a href="{{ url_for('studio') }}" class="nav-link {{ 'active' if request.endpoint in ('studio', 'availability_status_json') else '' }}"><span class="nav-icon" aria-hidden="true">⌗</span>Availability studio <span class="nav-live">LIVE</span></a>
+      <a href="{{ url_for('resources') }}" class="nav-link {{ 'active' if request.endpoint in ('resources', 'resource_detail', 'book', 'check_availability') else '' }}"><span class="nav-icon" aria-hidden="true">◫</span>Find a seat / PC</a>
+      <a href="{{ url_for('studio') }}" class="nav-link {{ 'active' if request.endpoint in ('studio', 'availability_status_json') else '' }}"><span class="nav-icon" aria-hidden="true">⌗</span>2D seat map <span class="nav-live">LIVE</span></a>
       <a href="{{ url_for('my_reservations') }}" class="nav-link {{ 'active' if request.endpoint in ('my_reservations', 'reservation_detail', 'cancel_reservation') else '' }}"><span class="nav-icon" aria-hidden="true">▤</span>My reservations</a>
       {% if g.user.role == 'ADMIN' %}<a href="{{ url_for('admin') }}" class="nav-link {{ 'active' if request.endpoint in ('admin', 'admin_decision', 'admin_create_resource', 'admin_edit_resource') else '' }}"><span class="nav-icon" aria-hidden="true">⚙</span>Administration</a>{% endif %}
     </nav>
     <div class="sidebar-spacer"></div>
-    <div class="help-panel"><span class="help-orb">✦</span><strong>Find your next space.</strong><p>Explore rooms and equipment in one place.</p><a href="{{ url_for('resources') }}">Browse catalogue <span aria-hidden="true">↗</span></a></div>
+    <div class="help-panel"><span class="help-orb">✦</span><strong>Find your study spot.</strong><p>Explore library seats and campus workstations.</p><a href="{{ url_for('resources') }}">Browse catalogue <span aria-hidden="true">↗</span></a></div>
     <div class="user-panel"><div class="avatar" aria-hidden="true">{{ g.user.email[:1]|upper }}</div><div class="user-label"><strong>{{ g.user.email.split('@')[0] }}</strong><span>{{ g.user.role|title }} account</span></div><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sign out" title="Sign out">↪</button></form></div>
   </aside>
   <main class="main-area">
@@ -34,7 +34,7 @@
       {% endwith %}
       {% block content %}{% endblock %}
 {% if g.user %}
-      <footer class="page-footer">UniReserve <span>·</span> University Resource Management <span>·</span> Student project demo</footer>
+      <footer class="page-footer">UniReserve <span>·</span> AzTU-inspired study booking demo <span>·</span> Student project demo</footer>
     </div>
   </main>
 </div>

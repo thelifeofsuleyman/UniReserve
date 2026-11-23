@@ -5,6 +5,7 @@
     SOON: ['Booked soon', 'soon'],
     OCCUPIED: ['Reserved', 'occupied'],
     DISABLED: ['Disabled', 'disabled'],
+    CLOSED: ['Closed hours', 'closed'],
   };
   async function refresh() {
     const note = document.getElementById('refresh-note');
@@ -18,13 +19,15 @@
         const value = payload.resources[element.dataset.resourceId];
         if (!value || !legend[value.state]) continue;
         element.dataset.state = value.state;
-        if (element.classList.contains('map-pin')) {
-          element.classList.remove('state-available', 'state-soon', 'state-occupied', 'state-disabled');
+        if (element.classList.contains('map-pin') || element.classList.contains('aztu-seat')) {
+          element.classList.remove('state-available', 'state-soon', 'state-occupied', 'state-disabled', 'state-closed');
           element.classList.add('state-' + legend[value.state][1]);
           const sub = element.querySelector('[data-status-text]');
           if (sub) sub.textContent = legend[value.state][0];
           element.setAttribute('aria-label', element.querySelector('.pin-name').textContent.trim() + ': ' + legend[value.state][0]);
         }
+        const label = element.querySelector('.signal-label');
+        if (label) label.textContent = legend[value.state][0];
         const dot = element.querySelector('.signal-dot');
         if (dot) {
           dot.classList.remove('available','soon','occupied','disabled');
