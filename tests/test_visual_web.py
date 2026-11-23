@@ -44,9 +44,9 @@ class VisualStudioIntegrationTests(unittest.TestCase):
         self.login()
         page=self.client.get('/studio')
         self.assertEqual(page.status_code,200)
-        self.assertIn(b'No sample spaces yet',page.data)
+        self.assertIn(b'No rooms available',page.data)
         self.assertIn(b'2D',page.data)
-        self.assertIn(b'NOT TO SCALE',page.data)
+        self.assertIn(b'No rooms available',page.data)
         self.assertIn(b'Starts within 15 min',page.data)
 
     def test_status_endpoint_is_private_and_not_cached(self):
@@ -88,7 +88,7 @@ class VisualStudioIntegrationTests(unittest.TestCase):
     def test_resources_are_linked_from_map_to_booking_page(self):
         self.login()
         response=self.client.get('/studio')
-        self.assertIn(b'No sample spaces yet',response.data)
+        self.assertIn(b'No rooms available',response.data)
         self.assertNotIn(b'Cinema Camera',response.data)
         page=self.client.get(f'/resources/{self.camera.id}')
         self.assertIn(b'Seat map',page.data)

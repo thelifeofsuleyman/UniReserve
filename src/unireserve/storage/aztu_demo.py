@@ -12,14 +12,14 @@ from unireserve.storage.models import Resource, Space
 # Official site describes library facilities and computer labs, not verified
 # room numbers or any actual individual-seat booking service.
 AREAS = (
-    ("LIB-READ", "AzTU Library · Reading Area (demo)", "LIBRARY_SEAT", "09:00", "17:30",
-     "Library centre lists 09:00–17:30; weekdays and seat access are demo assumptions."),
-    ("LIB-COMP", "AzTU Library · Computer Area (demo)", "LIBRARY_PC", "09:00", "17:30",
-     "Library centre reference hours; individual PC booking and weekdays are assumed."),
-    ("LAB-PC", "Computer Teaching Lab (sample)", "COMPUTER_LAB", "09:00", "18:00",
-     "General office hours are 09:00–18:00 weekdays; NOT verified lab access. Approval required."),
-    ("LIB-GROUP", "Library Group Study (sample)", "STUDY_ROOM", "09:00", "17:30",
-     "Sample study-room access policy, not an official room or opening schedule."),
+    ("LIB-READ", "Library · Reading Area", "LIBRARY_SEAT", "09:00", "17:30",
+     "Study seats available during posted opening hours."),
+    ("LIB-COMP", "Library · Computer Area", "LIBRARY_PC", "09:00", "17:30",
+     "Computer access is subject to current room availability."),
+    ("LAB-PC", "Computer Teaching Lab", "COMPUTER_LAB", "09:00", "18:00",
+     "Administrator approval required; class periods may restrict bookings."),
+    ("LIB-GROUP", "Library Group Study", "STUDY_ROOM", "09:00", "17:30",
+     "The reservation covers the entire room; approval required."),
 )
 # No seat count, laboratory number, or floor position here is represented
 # as a factual AzTU inventory. Each resource is one bookable unit.

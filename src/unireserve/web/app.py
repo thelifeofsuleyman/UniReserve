@@ -34,13 +34,23 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 def create_app(test_config: dict | None = None) -> Flask:
     """Create an isolated Flask application (supports test database injection)."""
     app = Flask(__name__, template_folder="templates", static_folder="static")
+    mode = os.environ.get("UNIRESERVE_MODE", "local").strip().lower()
+    if mode not in ("local", "production"):
+        raise RuntimeError("UNIRESERVE_MODE must be local or production")
+    production = mode == "production"
+    configured_hosts = [h.strip() for h in os.environ.get("UNIRESERVE_TRUSTED_HOSTS", "").split(",") if h.strip()]
+
     app.config.update(
         SECRET_KEY=os.environ.get("UNIRESERVE_SECRET_KEY") or secrets.token_hex(32),
         DB_PATH=os.environ.get("UNIRESERVE_DB_PATH") or str(BASE_DIR / "instance" / "unireserve.sqlite3"),
         DISPLAY_TIMEZONE=os.environ.get("UNIRESERVE_TIMEZONE", "Asia/Baku"),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=False,  # local http://127.0.0.1 demonstration only
+        SESSION_COOKIE_SECURE=production,
+        TRUSTED_HOSTS=configured_hosts if production else None,
+        PRODUCTION_MODE=production,
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+        PREFERRED_URL_SCHEME="https" if production else "http",
         MAX_CONTENT_LENGTH=64 * 1024,
         AUTO_SAMPLE_CATALOG=None,  # explicitly enabled by the local demo launcher only
     )
@@ -48,6 +58,15 @@ def create_app(test_config: dict | None = None) -> Flask:
         app.config.update(test_config)
     if app.config["AUTO_SAMPLE_CATALOG"] is None:
         app.config["AUTO_SAMPLE_CATALOG"] = os.environ.get("UNIRESERVE_AUTO_SAMPLE_CATALOG", "0") == "1"
+    if app.config["PRODUCTION_MODE"]:
+        if len(str(app.config.get("SECRET_KEY") or "")) < 32 or not os.environ.get("UNIRESERVE_SECRET_KEY"):
+            raise RuntimeError("Production requires a stable UNIRESERVE_SECRET_KEY of at least 32 characters")
+        if not app.config.get("TRUSTED_HOSTS"):
+            raise RuntimeError("Production requires UNIRESERVE_TRUSTED_HOSTS")
+        if not app.config.get("SESSION_COOKIE_SECURE"):
+            raise RuntimeError("Production requires HTTPS-only session cookies")
+        if app.config["AUTO_SAMPLE_CATALOG"]:
+            raise RuntimeError("Automatic sample catalogue initialization is disabled in production")
     try:
         display_zone = ZoneInfo(app.config["DISPLAY_TIMEZONE"])
     except ZoneInfoNotFoundError as exc:
@@ -65,6 +84,32 @@ def create_app(test_config: dict | None = None) -> Flask:
             sync_demo_catalog(engine)
     service = BookingService(engine)
     app.extensions["unireserve_engine"] = engine
+
+    @app.template_filter("area_title")
+    def area_title(value):
+        if not value:
+            return ""
+        return (str(value)
+                .replace("AzTU Library · ", "Library · ")
+                .replace(" (demo)", "")
+                .replace(" (sample)", ""))
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; font-src 'self' data:; connect-src 'self'; "
+            "form-action 'self'; frame-ancestors 'none'; base-uri 'self'")
+        if request.path.startswith("/static/"):
+            response.headers.setdefault("Cache-Control", "public, max-age=3600")
+        else:
+            response.headers["Cache-Control"] = "no-store"
+        if app.config["PRODUCTION_MODE"]:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
+        return response
 
     def actor_id() -> int:
         """Only trusted data from the signed Flask session supplies identity."""
@@ -168,6 +213,19 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.get("/")
     def index():
         return redirect(url_for("resources") if g.user else url_for("login"))
+
+    @app.get("/about")
+    def about():
+        return render_template("about.html", page_title="Service information")
+
+    @app.get("/healthz")
+    def healthz():
+        try:
+            with engine.connect() as connection:
+                connection.exec_driver_sql("SELECT 1")
+        except Exception:
+            return jsonify({"status": "unavailable"}), 503
+        return jsonify({"status": "ok"})
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -457,7 +515,7 @@ def create_app(test_config: dict | None = None) -> Flask:
                                        request.form.get("opens_at", ""),
                                        request.form.get("closes_at", ""),
                                        request.form.get("open_days", ""))
-            flash("Example area schedule updated.", "success")
+            flash("Opening hours updated.", "success")
         except BookingError as exc:
             return resolve_error(exc, url_for("admin"))
         return redirect(url_for("admin"))
