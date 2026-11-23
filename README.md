@@ -42,3 +42,19 @@ Work is being developed incrementally with Git branches and reviewed changes. Gi
 ## Academic integrity
 
 Initial scaffolding and documentation were prepared with ChatGPT assistance. The individual project reflection must accurately disclose AI use, and the student must review and understand all code and design decisions.
+
+
+## Milestone 4: Database and reservation engine
+
+The repository now contains a tested SQLAlchemy/SQLite service layer, but **no Flask web interface yet**. Services implement reservation state changes, transaction-safe conflict checks, role/ownership checks, resource editing, salted password hashing, and append-only audit events. See [implementation notes](docs/architecture/M4_IMPLEMENTATION_NOTES.md) and [test report](docs/testing/M4_TEST_REPORT.md).
+
+On Python 3.11+:
+
+    python -m pip install -r requirements-dev.txt
+    python scripts/run_tests.py
+    python scripts/validate_models.py
+    coverage run --source=src/unireserve scripts/run_tests.py
+    coverage report -m --fail-under=80
+    python scripts/demo_engine.py
+
+**Security:** Until login/session handling is added, never expose the service's user-ID argument as a client-controlled HTTP parameter. The caller must derive it from an authenticated session.
