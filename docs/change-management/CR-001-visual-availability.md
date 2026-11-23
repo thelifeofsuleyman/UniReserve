@@ -43,3 +43,7 @@ The original interface was logically correct but lacked images and a distinctive
 
 ## Evidence
 The real owner comments are logged in `docs/ui/UI_FEEDBACK_LOG.md`. Automated test cases are in `tests/test_live_status.py`, `tests/test_status_integration.py` and `tests/test_visual_web.py`. CI results are linked from the eventual pull request. **No follow-up acceptance from the owner is recorded until actually supplied.**
+
+## Subsequent Milestone 7 traceability check
+
+The supplementary `docs/diagrams/source/14-seq-CR-001-studio.puml` describes the authenticated read-only status flow. FR-002/003 map to this diagram, the domain indicator rule, BookingService snapshot method, route/API code, and test IDs in `docs/traceability/MATRIX.md`. The logical 3NF ERD remains unchanged because demonstration coordinates are not stored as actual campus data. New exported diagram images are generated and compiled in the diagram CI workflow. Owner approval of the revised appearance remains unrecorded.

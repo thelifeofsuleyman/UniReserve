@@ -1,3 +1,5 @@
-# Traceability (planned)
+# UniReserve — Traceability
 
-Map requirements to use cases, design elements, implementation modules, and tests. Every Must-priority requirement must have complete traceability. Reflect real files and tests rather than placeholders in the final matrix.
+[The matrix](MATRIX.md) maps every Must functional requirement to a documented use case, exported PlantUML design, existing source module, and named passed automated test. Deliberately deferred Should/Could requirements and unmeasured manual NFRs are marked as gaps rather than claimed complete.
+
+Run `python scripts/validate_traceability.py` after cloning and installing test dependencies. The CR-001 supplementary sequence diagram is in `docs/diagrams/source/14-seq-CR-001-studio.puml`.

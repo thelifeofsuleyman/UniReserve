@@ -25,7 +25,7 @@ def validate() -> None:
     srs = SRS.read_text(encoding="utf-8")
     usecases = USECASES.read_text(encoding="utf-8")
     diagrams = {p.name: p.read_text(encoding="utf-8") for p in SRC.glob("*.puml")}
-    check(len(diagrams) == 13, f"expected 13 diagrams, got {len(diagrams)}")
+    check(len(diagrams) == 14, f"expected 14 diagrams, got {len(diagrams)}")
     for name, body in diagrams.items():
         check(body.count("@startuml") == 1 and body.count("@enduml") == 1, f"invalid wrapper {name}")
         check("title " in body, f"missing diagram title {name}")
@@ -39,6 +39,7 @@ def validate() -> None:
     for ident in must_ids:
         check(bool(re.search(r"^\|\s*" + re.escape(ident) + r"\s*\|", ac_area, re.M)), f"missing acceptance criteria {ident}")
 
+    check("CR-001" in diagrams["14-seq-CR-001-studio.puml"], "CR-001 sequence missing")
     uc_diagram = diagrams["01-use-cases.puml"]
     for n in range(1, 7):
         code = f"UC-{n:02}"
