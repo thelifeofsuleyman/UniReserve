@@ -4,7 +4,7 @@
 **Student:** Suleyman Shafizada · Group m666i1  
 **Software Engineering project · Deadline: 2 December 2026**
 
-UniReserve lets students reserve individual library seats, desktop computers and study rooms. Administrators manage booking approvals, opening hours, closures, room inventory and account access. The interface includes interactive room plans and continuously updated reservation-status indicators.
+UniReserve lets students reserve individual library seats, desktop computers and study rooms. Administrators manage booking approvals, opening hours, closures, room inventory and account access. The interface includes interactive room plans, live current-status indicators, a date-specific booking calendar, and a personal seven-day schedule.
 
 ## Start on Windows / VS Code
 
@@ -60,6 +60,12 @@ UNIRESERVE_PROXY_COUNT=1
 Use `UNIRESERVE_PROXY_COUNT=1` **only** behind exactly one trusted proxy that replaces client-supplied forwarded headers. Production mode requires a secret of at least 32 characters, allowed hosts, HTTPS-only session cookies and prevents sample seeding. CSP, HSTS, anti-framing, no-sniff, and referrer headers are applied. See [Operations and Deployment](docs/deployment/OPERATIONS.md) for the architecture, account provisioning, backups and remaining release gates.
 
 **Important:** A production-styled interface and WSGI configuration are not the same as public deployment or production accreditation. An institution-hosted service still needs domain/TLS ownership, account recovery/SSO, rate limiting, audited backups, monitoring, security testing and real campus authorization.
+
+## Calendar and reservation-status behavior
+
+Select a seat, PC or group room and use **Availability calendar** below **Choose your time** to view confirmed reservations for a specific date (within the next 14 days). Green half-hour tiles are free; red tiles already have a confirmed booking; gray tiles are closed/past; amber tiles overlap another confirmed study-space reservation you own. Click a green tile to fill the reservation form, adjust times if required, then check or submit. Pending approvals do not block capacity; confirmation rechecks conflicts atomically.
+
+The sidebar's live map uses current-moment status, so a booking for tomorrow will not incorrectly turn a room red today. **My reservations** now shows a seven-day upcoming agenda above full booking history. No data about who booked another user's room is exposed by the schedule endpoint.
 
 ## Run validation
 

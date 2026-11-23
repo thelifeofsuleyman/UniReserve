@@ -23,3 +23,6 @@ Actual Windows screenshot of the **latest** CR-004 version, full student/admin b
 
 
 | UX-006 | 2026-11-23 | Owner requested removal of repetitive AI-style reminders, demo instructions and disclaimers from the booking interface, and asked for a more production-facing service. | CR-005 | Main screens simplified; source caveats consolidated in Service information and engineering reports. Production-mode configuration and admin room setup added. Public hosting not claimed. |
+
+
+| UX-007 | 2026-11-23 | Owner booked a room and noticed it did not display red for another person, and requested a date-selectable calendar under reservations to see availability. | CR-006 | Added half-hour future calendar to each booking page and seven-day personal agenda. Clarified present-moment status vs future reservations. |

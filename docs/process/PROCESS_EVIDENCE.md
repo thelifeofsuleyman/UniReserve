@@ -40,3 +40,7 @@ See `docs/process/SELF_REVIEW_CHECKLIST.md` and `docs/testing/FINAL_HANDOFF_AUDI
 
 ## CR-005 — Product presentation iteration
 The owner explicitly requested a polished website without redundant internal reminders. The UI was edited accordingly, while source attribution, original generated-image disclosure and AI support remained in the one service-information page and coursework reports/reflection. This iteration also added a non-debug Waitress launch path and strict hosted configuration, plus trusted account/area provisioning without sample fixtures. This does not create a publicly hosted site. Actual QA results are linked from the GitHub feature PR.
+
+
+## CR-006 — Reservation-calendar iteration
+The owner observed that a future booking did not change the current-status map to red for other users. This was a semantic difference rather than an inconsistent booking: the map only expresses status at the current time. A date-specific half-hour calendar was added to the booking page, with red reserved intervals, green available intervals, closed/past periods, owner-only overlapping-booking hints and click-to-prefill. A personal seven-day schedule was added under My reservations. Changes do not bypass transactional confirmation. The change, privacy considerations and test evidence are recorded in CR-006. CI pass/fail is linked from the matching pull request and workflow runs; no external user study is claimed.

@@ -38,3 +38,11 @@ Repository: https://github.com/thelifeofsuleyman/UniReserve
 - [x] Provide `/about` for truthful source/occupancy limitations.
 - [x] Add Waitress, secure production-mode settings, account creation and admin area creation.
 - [ ] Real domain + HTTPS reverse proxy, institutional room/identity approval, rate limiting and backup restore drill remain separate deployment tasks.
+
+
+## CR-006 — Date-specific reservations
+- [x] Confirm future occupied intervals are shown red to all signed-in visitors without exposing reservation owner data.
+- [x] Provide a date picker and clickable green intervals under the reservation form, with an atomic booking recheck.
+- [x] Show the signed-in user's confirmed/pending future bookings in the My reservations seven-day agenda.
+- [x] Add regression tests and formal traceability addenda.
+- [ ] Owner-led browser usability/keyboard review remains to be performed on their Windows machine.
