@@ -19,10 +19,9 @@ A green badge means free according to confirmed reservations **at the current st
 
 ## Quick start for an existing Windows clone
 
-Open VS Code's PowerShell terminal:
+Open VS Code's PowerShell terminal **inside the cloned UniReserve folder**:
 
 ```powershell
-cd C:\Users\Agach\UniReserve
 git pull origin main
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python.exe scripts/run_web.py
