@@ -40,7 +40,7 @@ def validate() -> None:
         check(bool(re.search(r"^\|\s*" + re.escape(ident) + r"\s*\|", ac_area, re.M)), f"missing acceptance criteria {ident}")
 
     check("CR-001" in diagrams["14-seq-CR-001-studio.puml"], "CR-001 sequence missing")
-    check("Space" in diagrams["15-aztu-space-extension.puml"] and "SpaceClosure" in diagrams["15-aztu-space-extension.puml"], "AzTU extension missing area or closure")
+    check("entity \"spaces\"" in diagrams["15-aztu-space-extension.puml"] and "entity \"space_closures\"" in diagrams["15-aztu-space-extension.puml"], "AzTU extension missing area or closure")
     check("BEGIN IMMEDIATE" in diagrams["16-aztu-booking-hours-sequence.puml"], "AzTU booking sequence must recheck inside transaction")
     uc_diagram = diagrams["01-use-cases.puml"]
     for n in range(1, 7):
