@@ -6,7 +6,7 @@ an immediate SQLite write transaction. This is service code, not an HTTP API.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Callable
 
 from sqlalchemy import select
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from unireserve.domain.availability import TimeWindow
 from unireserve.domain.live_status import ConfirmedInterval, StatusView, current_status
-from unireserve.domain.operating_hours import open_at, within_hours
+from unireserve.domain.operating_hours import BAKU, open_at, within_hours
 from unireserve.storage.db import write_transaction
 from unireserve.storage.models import Reservation, ReservationEvent, Resource, User, Space, SpaceClosure
 
@@ -378,6 +378,91 @@ class BookingService:
                         status = StatusView("CLOSED", status.next_start, status.current_end)
                 states[r.id] = status
             return states
+
+    def calendar_day(self, actor_id: int, resource_id: int, day: date,
+                     *, now: datetime | None = None) -> dict:
+        """Read-only availability per 30-minute window for a selected local date.
+
+        Only CONFIRMED reservations occupy slots. Protect requester identity:
+        responses contain no other users' names, emails or reservation IDs.
+        """
+        moment = self._now(now)
+        local_now = _from_naive_utc(moment).astimezone(BAKU)
+        if not isinstance(day, date) or isinstance(day, datetime):
+            raise InvalidRequest("select a valid calendar date")
+        if not local_now.date() <= day <= (local_now + timedelta(days=14)).date():
+            raise InvalidRequest("calendar date must be within the next 14 days")
+        with Session(self.engine) as session:
+            self._actor(session, actor_id)
+            resource = self._resource(session, resource_id)
+            if not resource.is_listed:
+                raise MissingRecord("resource not found")
+            space = session.get(Space, resource.space_id) if resource.space_id else None
+            day_start = datetime.combine(day, time.min, tzinfo=BAKU)
+            day_end = day_start + timedelta(days=1)
+            first_utc, last_utc = _to_naive_utc(day_start), _to_naive_utc(day_end)
+            confirmed = session.scalars(select(Reservation).where(
+                Reservation.resource_id == resource.id,
+                Reservation.status == "CONFIRMED",
+                Reservation.start_utc < last_utc,
+                Reservation.end_utc > first_utc,
+            )).all()
+            closures = session.scalars(select(SpaceClosure).where(
+                SpaceClosure.space_id == space.id,
+                SpaceClosure.start_utc < last_utc,
+                SpaceClosure.end_utc > first_utc,
+            )).all() if space else []
+            own_elsewhere = session.scalars(
+                select(Reservation).join(Resource, Resource.id == Reservation.resource_id).where(
+                    Reservation.user_id == actor_id,
+                    Reservation.status == "CONFIRMED",
+                    Resource.space_id.is_not(None),
+                    Reservation.start_utc < last_utc,
+                    Reservation.end_utc > first_utc,
+                )
+            ).all() if space else []
+            day_open = space is None or bool(
+                space.is_enabled and (space.open_days & (1 << day.weekday()))
+            )
+            cursor = datetime.combine(day, time.fromisoformat(space.opens_at) if space else time.min, tzinfo=BAKU)
+            closing = (datetime.combine(day, time.fromisoformat(space.closes_at), tzinfo=BAKU)
+                       if space else day_end)
+            slots = []
+            while cursor < closing:
+                finish = min(cursor + timedelta(minutes=30), closing)
+                begin_utc, finish_utc = _to_naive_utc(cursor), _to_naive_utc(finish)
+                def overlaps(rows):
+                    return any(row.start_utc < finish_utc and row.end_utc > begin_utc for row in rows)
+
+                if not resource.is_enabled or not day_open:
+                    state = "CLOSED"
+                elif overlaps(confirmed):
+                    # A confirmed 10:00–11:00 stays visibly reserved at
+                    # 10:15 instead of turning gray just because it began.
+                    state = "BOOKED"
+                elif begin_utc <= moment or begin_utc > moment + timedelta(days=14):
+                    state = "PAST"
+                elif overlaps(closures):
+                    state = "CLOSED"
+                elif overlaps(own_elsewhere):
+                    state = "OWN_BOOKING"
+                else:
+                    state = "AVAILABLE"
+                slots.append({
+                    "start": cursor.strftime("%Y-%m-%dT%H:%M"),
+                    "end": finish.strftime("%Y-%m-%dT%H:%M"),
+                    "label": cursor.strftime("%H:%M"),
+                    "state": state,
+                })
+                cursor = finish
+            return {
+                "date": day.isoformat(), "resource_id": resource.id,
+                "timezone": BAKU.key,
+                "opens_at": space.opens_at if space else "00:00",
+                "closes_at": space.closes_at if space else "24:00",
+                "requires_approval": resource.requires_approval,
+                "slots": slots,
+            }
 
     def available(self, actor_id: int, resource_id: int, window: TimeWindow) -> bool:
         with Session(self.engine) as session:

@@ -23,3 +23,7 @@ The repository is **private**. A lecturer cannot view it without authorized GitH
 
 ## CR-005 — Final presentation and hosting notes
 The website's public-facing screens now prioritize booking actions rather than repeating coursework/setup notes. A dedicated Service information page retains honest source and occupancy limitations. Production-mode WSGI/security configuration and administrator-managed area/account setup are documented in `docs/deployment/OPERATIONS.md` and CR-005. No live hosted URL or institution-approved access has been asserted. All assessed PDFs are rebuilt and checked by the GitHub export workflow.
+
+
+## CR-006: calendar clarification
+The per-resource booking page now includes a date-dependent calendar; My reservations has a personal seven-day agenda. The new functionality, privacy rules, tests, and change impact are reflected in the Requirements, Testing, Traceability and Process PDF source material. The reflection remains a student-review draft, and university submission remains a separate action.
