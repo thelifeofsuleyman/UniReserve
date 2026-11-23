@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="login-hero">
+  <div class="auth-brand"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<strong>reserve</strong></span></div>
+  <div class="login-orbit" aria-hidden="true"><span class="orbit-one"></span><span class="orbit-two"></span><span class="orbit-three"></span><div class="orbit-center">U<span>.</span></div></div>
+  <div class="login-hero-copy"><span class="eyebrow inverse">THE SMARTER WAY TO RESERVE</span><h1>Campus resources.<br><em>On your schedule.</em></h1><p>Book study rooms, borrow university equipment, and manage every reservation in one calm workspace.</p><div class="hero-features"><span>✓ Real-time availability</span><span>✓ Easy approvals</span><span>✓ Transparent booking history</span></div></div>
+  <div class="login-hero-foot">UNIRESERVE / UNIVERSITY RESOURCE MANAGEMENT</div>
+</section>
+<section class="auth-form-section"><div class="auth-form-inner"><span class="form-overline">YOUR WORKSPACE STARTS HERE</span><h2>Welcome back<span class="title-spark">.</span></h2><p class="text-muted">Enter your university demo account to continue.</p>
+<form action="{{ url_for('login') }}" method="post" class="stack-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="username" placeholder="student@unireserve.test" required maxlength="255" autofocus>
+  <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+  <button class="button primary full" type="submit">Sign in to UniReserve <span aria-hidden="true">→</span></button>
+</form>
+<div class="auth-note"><span class="info-icon">i</span><p>Accounts are created by the local <code>seed_demo.py</code> script. There is no public sign-up.</p></div>
+<div class="auth-security">◈ Local university project demonstration</div></div></section>
+{% endblock %}

@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<div class="empty-state error-page"><span class="empty-icon">!</span><span class="eyebrow">REQUEST ERROR</span><h1>{{ error_code }}</h1><h3>{{ 'Something went wrong.' if error_code == 400 else ('You do not have permission to view this page.' if error_code == 403 else 'The page or reservation was not found.') }}</h3><p>{{ error_description }}</p><a class="button dark" href="{{ url_for('resources') if g.user else url_for('login') }}">Return to UniReserve</a></div>{% endblock %}

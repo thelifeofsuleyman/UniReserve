@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b35">
+  <title>{{ page_title }} · UniReserve</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="{{ 'auth-page' if not g.user else 'dashboard-page' }}">
+{% if g.user %}
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>Campus resources, simplified.</small></span></a>
+    <div class="sidebar-section-label">WORKSPACE</div>
+    <nav class="nav-list">
+      <a href="{{ url_for('resources') }}" class="nav-link {{ 'active' if request.endpoint in ('resources', 'resource_detail', 'book', 'check_availability') else '' }}"><span class="nav-icon" aria-hidden="true">◫</span>Explore resources</a>
+      <a href="{{ url_for('my_reservations') }}" class="nav-link {{ 'active' if request.endpoint in ('my_reservations', 'reservation_detail', 'cancel_reservation') else '' }}"><span class="nav-icon" aria-hidden="true">▤</span>My reservations</a>
+      {% if g.user.role == 'ADMIN' %}<a href="{{ url_for('admin') }}" class="nav-link {{ 'active' if request.endpoint in ('admin', 'admin_decision', 'admin_create_resource', 'admin_edit_resource') else '' }}"><span class="nav-icon" aria-hidden="true">⚙</span>Administration</a>{% endif %}
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <div class="help-panel"><span class="help-orb">✦</span><strong>Find your next space.</strong><p>Explore rooms and equipment in one place.</p><a href="{{ url_for('resources') }}">Browse catalogue <span aria-hidden="true">↗</span></a></div>
+    <div class="user-panel"><div class="avatar" aria-hidden="true">{{ g.user.email[:1]|upper }}</div><div class="user-label"><strong>{{ g.user.email.split('@')[0] }}</strong><span>{{ g.user.role|title }} account</span></div><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sign out" title="Sign out">↪</button></form></div>
+  </aside>
+  <main class="main-area">
+    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">Campus workspace</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill">◷ {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
+    <div class="content-wrap">
+{% else %}
+<div class="auth-wrap">
+{% endif %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}<div class="flash-stack" role="status" aria-live="polite">{% for category, message in messages %}<div class="flash flash-{{ category }}"><span aria-hidden="true">{{ '✓' if category == 'success' else '!' }}</span>{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+{% if g.user %}
+      <footer class="page-footer">UniReserve <span>·</span> University Resource Management <span>·</span> Student project demo</footer>
+    </div>
+  </main>
+</div>
+{% else %}
+</div>
+{% endif %}
+</body>
+</html>
