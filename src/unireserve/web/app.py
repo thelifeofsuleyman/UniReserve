@@ -191,12 +191,26 @@ def create_app(test_config: dict | None = None) -> Flask:
         except BookingError as exc:
             return resolve_error(exc, url_for("resources"))
         suggested_start, suggested_end = time_suggestions()
+        # Preserve chosen dates after checking availability or failed booking.
+        chosen_start = request.args.get("start", "")
+        chosen_end = request.args.get("end", "")
+        try:
+            datetime.strptime(chosen_start, "%Y-%m-%dT%H:%M")
+            datetime.strptime(chosen_end, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            chosen_start, chosen_end = suggested_start, suggested_end
         return render_template("resource_detail.html", page_title=resource.name,
-                               resource=resource, start=suggested_start, end=suggested_end)
+                               resource=resource, start=chosen_start, end=chosen_end)
+
+    def resume_booking_url(resource_id: int) -> str:
+        return url_for("resource_detail", resource_id=resource_id,
+                       start=request.form.get("start", "")[:16],
+                       end=request.form.get("end", "")[:16])
 
     @app.post("/resources/<int:resource_id>/availability")
     @login_required
     def check_availability(resource_id: int):
+        back = resume_booking_url(resource_id)
         try:
             window = form_window()
             result = service.available(actor_id(), resource_id, window)
@@ -204,8 +218,8 @@ def create_app(test_config: dict | None = None) -> Flask:
                   else "This time slot is unavailable. Please choose another time.",
                   "success" if result else "error")
         except BookingError as exc:
-            return resolve_error(exc, url_for("resource_detail", resource_id=resource_id))
-        return redirect(url_for("resource_detail", resource_id=resource_id))
+            return resolve_error(exc, back)
+        return redirect(back)
 
     @app.post("/resources/<int:resource_id>/book")
     @login_required
@@ -218,7 +232,7 @@ def create_app(test_config: dict | None = None) -> Flask:
                   else "Request sent! An administrator will review it.", "success")
             return redirect(url_for("my_reservations"))
         except BookingError as exc:
-            return resolve_error(exc, url_for("resource_detail", resource_id=resource_id))
+            return resolve_error(exc, resume_booking_url(resource_id))
 
     @app.get("/my-reservations")
     @login_required

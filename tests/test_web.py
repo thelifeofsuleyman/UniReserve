@@ -147,6 +147,24 @@ class WebIntegrationTests(unittest.TestCase):
         self.assertIn(b"This time slot is available", result.data)
         self.assertEqual(self._counts(), 0)
 
+    def test_availability_check_preserves_selected_form_times(self):
+        self._login()
+        form = self._window_form()
+        response = self._post(f"/resources/{self.room.id}/availability", form, follow_redirects=True)
+        self.assertIn(b"This time slot is available", response.data)
+        self.assertIn(f'value="{form["start"]}"'.encode(), response.data)
+        self.assertIn(f'value="{form["end"]}"'.encode(), response.data)
+        self.assertEqual(self._counts(), 0)
+
+    def test_validation_failure_preserves_selected_form_times(self):
+        self._login()
+        form = self._window_form()
+        form["end"] = form["start"]
+        response = self._post(f"/resources/{self.room.id}/book", form, follow_redirects=True)
+        self.assertIn(b"Enter valid start and end times", response.data)
+        self.assertIn(f'value="{form["start"]}"'.encode(), response.data)
+        self.assertEqual(self._counts(), 0)
+
     def test_standard_reservation_confirmed_and_own_listed(self):
         self._login()
         result = self._post(f"/resources/{self.room.id}/book", self._window_form(), follow_redirects=True)

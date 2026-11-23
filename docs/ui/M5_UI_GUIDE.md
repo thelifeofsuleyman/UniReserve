@@ -21,7 +21,7 @@ The HTML is rendered server-side using Flask/Jinja; CSS is responsive and does n
 2. **Form CSRF:** every POST requires a session-specific cryptographic token, including login, logout, booking and admin changes. Forms without valid tokens are rejected with HTTP 400.
 3. **Least privilege:** administrators manage inventory/approval but cannot create a student booking; ordinary users cannot access admin views. Users cannot read or cancel other users' booking details.
 4. **Time semantics:** HTML `datetime-local` is interpreted in the explicitly displayed `Asia/Baku` timezone. UTC-aware intervals are passed to the service, which checks future start, 14-day horizon, and room/equipment duration.
-5. **Failure UX:** booking conflicts and policy failures use understandable flash messages; inactive/invalid users must sign in again; access-denied errors show 403 without mutating data.
+5. **Failure UX:** date/time inputs are preserved after availability checks and rejected bookings; booking conflicts and policy failures use understandable flash messages; inactive/invalid users must sign in again; access-denied errors show 403 without mutating data.
 6. **Audits:** reservation detail shows status transitions that the service saved atomically; the UI never writes events itself.
 7. **Local-only:** development server binds `127.0.0.1`, with HTTPS/cookie-secure mode reserved for a production reverse proxy.
 
@@ -47,3 +47,5 @@ The HTML is rendered server-side using Flask/Jinja; CSS is responsive and does n
 ## Documentation and review protocol
 
 The user should provide feedback in conversation or screenshots. Record only **actual** feedback in `UI_FEEDBACK_LOG.md` with date, screen, observation, action and affected requirement/design/test IDs. If feedback changes agreed behavior, create a change request and update both requirements and UML sources before claiming consistency. Do not invent stakeholder sign-off or test outcomes.
+
+**Responsive review note:** The mobile navigation retains a visible sign-out action alongside the student/admin account label.
