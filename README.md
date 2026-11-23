@@ -14,7 +14,7 @@ Install **Python 3.11 or later** and Git. Open **PowerShell** (or VS Code Termin
 git clone https://github.com/thelifeofsuleyman/UniReserve.git
 cd UniReserve
 py -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-dev.txt
 python scripts/seed_demo.py
 python scripts/run_web.py
@@ -24,7 +24,7 @@ Open **http://127.0.0.1:5000** in a browser. Leave the terminal open while using
 
 **Save the demo login credentials shown by `seed_demo.py`.** Three randomized accounts are created (`student@unireserve.test`, `staff@unireserve.test` and `admin@unireserve.test`). Their passwords are printed **once**, never checked into Git. The student/staff accounts can book; the admin account can review pending requests and manage resources. The script also creates six sample rooms/equipment items. Running it twice on the same database does not reset existing accounts.
 
-> PowerShell execution-policy error when activating? You can skip activation and use `.\.venv\Scripts\python.exe` instead of `python` for every command, including install/seed/start. Alternatively, in the current terminal run `Set-ExecutionPolicy -Scope Process Bypass`, then activate again.
+> PowerShell execution-policy error when activating? You can skip activation and use `.venv\Scripts\python.exe` instead of `python` for every command, including install/seed/start. Alternatively, in the current terminal run `Set-ExecutionPolicy -Scope Process Bypass`, then activate again.
 
 ### Start on macOS / Linux
 
@@ -98,3 +98,11 @@ This is a **local coursework demo**, not an internet-facing production system: n
 ## AI use disclosure
 
 ChatGPT assisted with draft requirements, diagrams, scaffolding, implementation, testing guidance and design documentation. The student should review the entire repository, verify behavior, record genuine feedback and disclose the actual assistance in the final individual reflection.
+
+## Milestone 5.5: Visual availability studio
+
+User feedback led to a deliberate visual redesign (change request [`CR-001`](docs/change-management/CR-001-visual-availability.md)). An original resource illustration atlas provides real imagery on the login, catalogue and detail pages, with a clickable **Availability studio** in the sidebar.
+
+The Studio is **not** a real physical campus floor plan: placements are illustrative, and status comes from confirmed reservation records rather than occupancy sensors. Green = available now, yellow = confirmed booking within the next 15 minutes, red = confirmed booking active now, grey = disabled. Pending approvals do not hold capacity. The read-only browser view refreshes every 30 seconds; the database transaction still makes the final decision.
+
+See the [UI review notes](docs/ui/M55_VISUAL_REVIEW.md) and [owner feedback log](docs/ui/UI_FEEDBACK_LOG.md). The owner has not yet reviewed the revised interface.
