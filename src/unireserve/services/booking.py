@@ -14,6 +14,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from unireserve.domain.availability import TimeWindow
+from unireserve.domain.live_status import ConfirmedInterval, StatusView, current_status
 from unireserve.storage.db import write_transaction
 from unireserve.storage.models import Reservation, ReservationEvent, Resource, User
 
@@ -185,6 +186,29 @@ class BookingService:
                                          _from_naive_utc(b.start_utc), _from_naive_utc(b.end_utc),
                                          b.status)
                     for b, email, name, code in rows]
+
+    def status_overview(self, actor_id: int, *, now: datetime | None = None) -> dict[int, StatusView]:
+        """Authenticated read-only availability snapshot for visual UI.
+
+        No requester identities or private reservation details are exposed.
+        The 15-minute state is about the *next confirmed* booking only.
+        """
+        moment = self._now(now)
+        aware_now = _from_naive_utc(moment)
+        with Session(self.engine) as session:
+            self._actor(session, actor_id)
+            resources = session.scalars(select(Resource).order_by(Resource.id)).all()
+            active_or_future = session.scalars(
+                select(Reservation).where(
+                    Reservation.status == "CONFIRMED", Reservation.end_utc > moment
+                ).order_by(Reservation.start_utc)
+            ).all()
+            grouped: dict[int, list[ConfirmedInterval]] = {r.id: [] for r in resources}
+            for booking in active_or_future:
+                grouped.setdefault(booking.resource_id, []).append(ConfirmedInterval(
+                    _from_naive_utc(booking.start_utc), _from_naive_utc(booking.end_utc)))
+            return {r.id: current_status(r.is_enabled, grouped[r.id], aware_now)
+                    for r in resources}
 
     def available(self, actor_id: int, resource_id: int, window: TimeWindow) -> bool:
         with Session(self.engine) as session:

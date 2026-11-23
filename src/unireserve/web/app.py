@@ -13,7 +13,7 @@ from pathlib import Path
 import secrets
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from flask import (Flask, abort, flash, g, redirect, render_template, request,
+from flask import (Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request,
                    session, url_for)
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -168,6 +168,71 @@ def create_app(test_config: dict | None = None) -> Flask:
         flash("You have signed out.", "success")
         return redirect(url_for("login"))
 
+    def display_status(st):
+        if st is None:
+            return "UNKNOWN"
+        return st.state
+
+    @app.context_processor
+    def image_and_status_helpers():
+        def resource_photo(resource):
+            label = (resource.name + " " + resource.public_code).casefold()
+            if "camera" in label or "cam" in label or "photo" in label:
+                return "photo-camera"
+            if "laptop" in label or "computer" in label:
+                return "photo-laptop"
+            if "project" in label or "meeting" in label or "conference" in label:
+                return "photo-meeting"
+            return "photo-study" if resource.category == "ROOM" else "photo-camera"
+        return {"resource_photo": resource_photo, "display_status": display_status}
+
+    def studio_points(resources, statuses):
+        # A clear demo layout, not a surveyed map of any real university building.
+        # IDs provide stable positions across page loads and are not coordinates in a campus room.
+        rooms = [r for r in resources if r.category == "ROOM"]
+        equipment = [r for r in resources if r.category == "EQUIPMENT"]
+        result = []
+        for section, items, positions in (
+            ("ROOM", rooms, ((12, 19), (53, 17), (13, 65), (52, 64), (33, 42), (68, 48))),
+            ("EQUIPMENT", equipment, ((12, 20), (54, 20), (12, 65), (54, 65), (32, 44), (75, 45))),
+        ):
+            for index, resource in enumerate(items):
+                x, y = positions[index % len(positions)]
+                # Small offset for inventories larger than the default demo set.
+                if index >= len(positions):
+                    x = min(83, x + (index // len(positions)) * 5)
+                    y = min(82, y + (index // len(positions)) * 5)
+                result.append({"resource": resource, "section": section,
+                               "x": x, "y": y, "status": statuses[resource.id]})
+        return result
+
+    @app.get("/studio")
+    @login_required
+    def studio():
+        resources = service.list_resources(actor_id())
+        statuses = service.status_overview(actor_id())
+        return render_template("studio.html", page_title="Live resource studio",
+                               points=studio_points(resources, statuses),
+                               resources=resources, statuses=statuses,
+                               checked_time=datetime.now(display_zone).strftime("%H:%M"))
+
+    @app.get("/api/availability-status")
+    @login_required
+    def availability_status_json():
+        """Informational read-only snapshot; never exposes reservation owners."""
+        statuses = service.status_overview(actor_id())
+        response = make_response(jsonify({
+            "checked_at": datetime.now(display_zone).strftime("%H:%M"),
+            "timezone": app.config["DISPLAY_TIMEZONE"],
+            "resources": {str(resource_id): {
+                "state": status.state,
+                "next_start": status.next_start.isoformat() if status.next_start else None,
+                "current_end": status.current_end.isoformat() if status.current_end else None,
+            } for resource_id, status in statuses.items()}
+        }))
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
     @app.get("/resources")
     @login_required
     def resources():
@@ -178,7 +243,8 @@ def create_app(test_config: dict | None = None) -> Flask:
         term = request.args.get("q", "").strip()[:100]
         visible = [r for r in records if (category == "ALL" or r.category == category)
                    and (not term or term.casefold() in (r.name + " " + r.public_code).casefold())]
-        return render_template("resources.html", page_title="Explore resources", resources=visible,
+        statuses = service.status_overview(actor_id())
+        return render_template("resources.html", page_title="Explore resources", resources=visible, statuses=statuses,
                                category=category, term=term, total=len(records),
                                room_count=sum(r.category == "ROOM" for r in records),
                                equipment_count=sum(r.category == "EQUIPMENT" for r in records))
@@ -191,7 +257,8 @@ def create_app(test_config: dict | None = None) -> Flask:
         except BookingError as exc:
             return resolve_error(exc, url_for("resources"))
         suggested_start, suggested_end = time_suggestions()
-        # Preserve chosen dates after checking availability or failed booking.
+        # Preserve the user's chosen time after an availability check or
+        # failed booking. Never substitute an unvalidated browser value.
         chosen_start = request.args.get("start", "")
         chosen_end = request.args.get("end", "")
         try:
@@ -199,8 +266,10 @@ def create_app(test_config: dict | None = None) -> Flask:
             datetime.strptime(chosen_end, "%Y-%m-%dT%H:%M")
         except ValueError:
             chosen_start, chosen_end = suggested_start, suggested_end
+        statuses = service.status_overview(actor_id())
         return render_template("resource_detail.html", page_title=resource.name,
-                               resource=resource, start=chosen_start, end=chosen_end)
+                               resource=resource, current_status=statuses[resource.id],
+                               start=chosen_start, end=chosen_end)
 
     def resume_booking_url(resource_id: int) -> str:
         return url_for("resource_detail", resource_id=resource_id,

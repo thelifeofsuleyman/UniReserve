@@ -11,10 +11,11 @@
 {% if g.user %}
 <div class="app-shell">
   <aside class="sidebar" aria-label="Main navigation">
-    <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>Campus resources, simplified.</small></span></a>
+    <a class="brand" href="{{ url_for('resources') }}"><span class="brand-mark">U<span class="brand-dot">.</span></span><span>uni<span class="brand-heavy">reserve</span><small>A clearer view of campus.</small></span></a>
     <div class="sidebar-section-label">WORKSPACE</div>
     <nav class="nav-list">
       <a href="{{ url_for('resources') }}" class="nav-link {{ 'active' if request.endpoint in ('resources', 'resource_detail', 'book', 'check_availability') else '' }}"><span class="nav-icon" aria-hidden="true">◫</span>Explore resources</a>
+      <a href="{{ url_for('studio') }}" class="nav-link {{ 'active' if request.endpoint in ('studio', 'availability_status_json') else '' }}"><span class="nav-icon" aria-hidden="true">⌗</span>Availability studio <span class="nav-live">LIVE</span></a>
       <a href="{{ url_for('my_reservations') }}" class="nav-link {{ 'active' if request.endpoint in ('my_reservations', 'reservation_detail', 'cancel_reservation') else '' }}"><span class="nav-icon" aria-hidden="true">▤</span>My reservations</a>
       {% if g.user.role == 'ADMIN' %}<a href="{{ url_for('admin') }}" class="nav-link {{ 'active' if request.endpoint in ('admin', 'admin_decision', 'admin_create_resource', 'admin_edit_resource') else '' }}"><span class="nav-icon" aria-hidden="true">⚙</span>Administration</a>{% endif %}
     </nav>
@@ -23,7 +24,7 @@
     <div class="user-panel"><div class="avatar" aria-hidden="true">{{ g.user.email[:1]|upper }}</div><div class="user-label"><strong>{{ g.user.email.split('@')[0] }}</strong><span>{{ g.user.role|title }} account</span></div><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sign out" title="Sign out">↪</button></form></div>
   </aside>
   <main class="main-area">
-    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">Campus workspace</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill">◷ {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
+    <header class="topbar"><div class="topbar-leading"><span class="mobile-mark">U.</span><span class="topbar-crumb">Resource operations</span><span class="crumb-divider">/</span><strong>{{ page_title }}</strong></div><div class="topbar-trailing"><span class="timezone-pill">◷ {{ timezone_name }}</span><span class="header-avatar">{{ g.user.email[:1]|upper }}</span></div></header>
     <div class="content-wrap">
 {% else %}
 <div class="auth-wrap">

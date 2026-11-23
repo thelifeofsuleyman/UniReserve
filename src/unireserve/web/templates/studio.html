@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="studio-heading"><div><span class="eyebrow">02 / LIVE RESOURCE VIEW</span><h1>See the <em>space.</em><br>Know the moment.</h1><p>A practical 2D view of our demonstration resources. Select an item to book it or check its next reservation.</p></div><div class="studio-clock"><span class="studio-pulse"></span><div><strong>STATUS SNAPSHOT</strong><span>Checked <time id="checked-at">{{ checked_time }}</time> · {{ timezone_name }}</span></div></div></div>
+<div class="signal-legend" aria-label="Availability legend"><span><i class="signal-dot available"></i> Available now</span><span><i class="signal-dot soon"></i> Booked in ≤ 15 min</span><span><i class="signal-dot occupied"></i> Currently reserved</span><span><i class="signal-dot disabled"></i> Out of service</span></div>
+<div class="studio-shell">
+  <div class="studio-plan" aria-label="Illustrative layout of study room and equipment desk">
+    <div class="plan-meta"><span>UNIRESERVE / FLOOR 01</span><span>DEMONSTRATION MAP — NOT TO SCALE</span></div>
+    <div class="plan-areas">
+      <section class="plan-zone plan-room" aria-label="Study wing room resources"><div class="zone-tag">A / STUDY WING</div><div class="zone-surface"><span class="floor-lines" aria-hidden="true"></span><div class="plan-furniture furniture-table" aria-hidden="true"><span></span><span></span></div><div class="plan-furniture furniture-sofa" aria-hidden="true"></div><div class="room-door" aria-hidden="true">ENTRY</div>
+        {% for p in points if p.section=='ROOM' %}<a class="map-pin state-{{ p.status.state|lower }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%" href="{{ url_for('resource_detail', resource_id=p.resource.id) }}" data-resource-id="{{ p.resource.id }}" data-state="{{ p.status.state }}" aria-label="{{ p.resource.name }}: {{ p.status.state|lower|replace('_',' ') }}"><span class="pin-icon" aria-hidden="true">▤</span><span class="pin-name">{{ p.resource.name }}</span><span class="pin-sub" data-status-text>{{ {'AVAILABLE':'Available','SOON':'Booked soon','OCCUPIED':'Reserved','DISABLED':'Disabled'}[p.status.state] }}</span></a>{% endfor %}
+      </div></section>
+      <section class="plan-zone plan-equipment" aria-label="Equipment desk resources"><div class="zone-tag">B / EQUIPMENT BAY</div><div class="zone-surface"><span class="floor-lines" aria-hidden="true"></span><div class="rack rack-one" aria-hidden="true">STORAGE</div><div class="rack rack-two" aria-hidden="true">CHECKOUT</div>
+        {% for p in points if p.section=='EQUIPMENT' %}<a class="map-pin state-{{ p.status.state|lower }}" style="--x:{{ p.x }}%;--y:{{ p.y }}%" href="{{ url_for('resource_detail', resource_id=p.resource.id) }}" data-resource-id="{{ p.resource.id }}" data-state="{{ p.status.state }}" aria-label="{{ p.resource.name }}: {{ p.status.state|lower|replace('_',' ') }}"><span class="pin-icon" aria-hidden="true">▣</span><span class="pin-name">{{ p.resource.name }}</span><span class="pin-sub" data-status-text>{{ {'AVAILABLE':'Available','SOON':'Booked soon','OCCUPIED':'Reserved','DISABLED':'Disabled'}[p.status.state] }}</span></a>{% endfor %}
+      </div></section>
+    </div><div class="plan-foot"><span>◦ Illustrative resource placement, not verified physical coordinates</span><span>Click a resource for details ↗</span></div>
+  </div>
+  <aside class="studio-side"><div class="side-intro"><span class="eyebrow">RESOURCE DIRECTORY</span><h2>Find your next move.</h2><p>Every colored dot is based on real confirmed reservations in the demo database.</p></div><div class="studio-directory">
+  {% for r in resources %}{% set st=statuses[r.id] %}<a class="directory-item" href="{{ url_for('resource_detail', resource_id=r.id) }}" data-resource-id="{{ r.id }}" data-state="{{ st.state }}"><span class="directory-icon">{{ '▤' if r.category == 'ROOM' else '▣' }}</span><span class="directory-copy"><strong>{{ r.name }}</strong><small>{{ r.public_code }} · {{ r.category|title }}</small></span><span class="signal-dot {{ st.state|lower }}"></span></a>{% endfor %}
+  </div><div class="directory-note"><strong>How “live” works</strong><p>This page refreshes statuses every 30 seconds. It shows reservation records, not real-time sensors. A green marker is not a guarantee that nobody is physically inside.</p><span id="refresh-note" aria-live="polite">Monitoring booking status</span></div></aside>
+</div>
+<script src="{{ url_for('static', filename='studio.js') }}" defer></script>
+{% endblock %}
