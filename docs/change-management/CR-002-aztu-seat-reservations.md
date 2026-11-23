@@ -38,7 +38,7 @@ A user reserves an individual **seat or workstation**. A teaching lab PC needs a
 
 ## Architecture / 3NF impact
 
-Added 4 normalized `spaces` (code, name, kind, office hours, weekday **bitmask**, policy note, enabled) and `space_closures` (space FK, start, end, reason). Each resource gains a nullable `space_id` FK and an `is_listed` flag; the category remains backward compatible (`ROOM`/`EQUIPMENT`). The weekday bitmask is a single scalar rather than a comma-separated repeating field. The 3NF model still stores user and resource names only once, and all changes are service-layer controlled. See diagram **15** and booking/closure sequence **16**.
+Added two normalized `spaces` (code, name, kind, office hours, weekday **bitmask**, policy note, enabled) and `space_closures` (space FK, start, end, reason). Each resource gains a nullable `space_id` FK and an `is_listed` flag; the category remains backward compatible (`ROOM`/`EQUIPMENT`). The weekday bitmask is a single scalar rather than a comma-separated repeating field. The 3NF model still stores user and resource names only once, and all changes are service-layer controlled. See diagram **15** and booking/closure sequence **16**.
 
 `create_schema` performs **additive SQLite migration** for the original Resource columns without dropping tables. `sync_aztu_demo.py` is intentionally separate from app startup; it operates on the local demo database only. The existing 2D map is replaced with one section per example Area, not coordinates claimed as surveyed.
 

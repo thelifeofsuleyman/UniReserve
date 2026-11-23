@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="aztu-intro"><div><span class="eyebrow">AzTU / SPACE BOOKING DEMO</span><h1>Pick your <em>place.</em></h1><p>Reserve a specific library seat or computer, not the whole room. Each dot represents one bookable unit.</p></div><div class="studio-clock"><span class="studio-pulse"></span><div><strong>BOOKING STATUS</strong><span>Checked <time id="checked-at">{{ checked_time }}</time> · Asia/Baku</span></div></div></div>
-<div class="aztu-context"><strong>Built around real AzTU facilities, not a verified floor plan.</strong> The university describes its library reading areas and computer laboratories. The seat counts, positions and lab access rules shown here are illustrative demonstration data. <a href="https://aztu.edu.az/az/page/kampus-202" target="_blank" rel="noopener">Campus reference ↗</a></div>
+<div class="aztu-context"><strong>Built around real AzTU facilities, not a verified floor plan.</strong> The university describes its library reading areas and computer laboratories. <strong>NOT TO SCALE.</strong> The seat counts, positions and lab access rules shown here are illustrative demonstration data. <a href="https://aztu.edu.az/az/page/kampus-202" target="_blank" rel="noopener">Campus reference ↗</a></div>
 <div class="signal-legend"><span><i class="signal-dot available"></i> Available</span><span><i class="signal-dot soon"></i> Starts within 15 min</span><span><i class="signal-dot occupied"></i> Booked now</span><span><i class="signal-dot closed"></i> Closed hours</span><span><i class="signal-dot disabled"></i> Unavailable</span></div>
 {% for group in groups %}
 <section class="aztu-zone-wrap">
