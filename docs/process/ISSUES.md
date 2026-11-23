@@ -16,11 +16,11 @@ Completed items reflect actual merged PRs, not invented task-board activity.
 - [x] CR-002 — AzTU-inspired library seats, lab PCs, schedules and area closures — PR #9.
 - [x] CR-003 — Cohesive UI, simultaneous-seat fairness and safer admin edits — PR #10.
 - [x] CR-004 — Correct room-specific images, four logical maps, automatic local sample setup — PR #11.
-- [x] Final technical audit — latest CI confirms 123 tests/94% coverage; reference \`docs/testing/FINAL_HANDOFF_AUDIT.md\`.
+- [x] Final technical audit — latest CI confirms 123 tests/94% coverage; reference `docs/testing/FINAL_HANDOFF_AUDIT.md`.
 
 ## Honest outstanding tasks
 - [ ] Owner runs and personally evaluates current build on Windows (including keyboard/mobile behavior).
-- [ ] Owner reviews, edits and approves \`docs/reflection/REFLECTION_DRAFT.md\`.
+- [ ] Owner reviews, edits and approves `docs/reflection/REFLECTION_DRAFT.md`.
 - [ ] Instructor access granted to the private GitHub repository.
 - [ ] Owner submits GitHub link through KOICA and retains submission confirmation.
 

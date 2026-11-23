@@ -14,7 +14,7 @@ The cost was substantial relative to the small assignment: requirements, diagram
 
 ## Design and implementation differences
 
-My first design used four core entities and separate repository interfaces and service classes. As the requirements evolved, the working SQLAlchemy model gained \`Space\` and \`SpaceClosure\` for operating hours and teaching/maintenance closures, bringing the current schema to six main tables. Some conceptual repository abstractions remain design-level patterns rather than one-to-one Python classes. The implementation uses SQLAlchemy sessions, Flask's signed sessions and a transaction context manager to stay manageable for an individual project.
+My first design used four core entities and separate repository interfaces and service classes. As the requirements evolved, the working SQLAlchemy model gained `Space` and `SpaceClosure` for operating hours and teaching/maintenance closures, bringing the current schema to six main tables. Some conceptual repository abstractions remain design-level patterns rather than one-to-one Python classes. The implementation uses SQLAlchemy sessions, Flask's signed sessions and a transaction context manager to stay manageable for an individual project.
 
 The 2D maps deliberately use schematic desks, aisles, a teaching board and one whole-room booking control for the group room. The six chairs pictured in the group room are **not** six separate booking units. The images are original AI-generated illustrations, not surveyed AzTU photographs. Availability colors are calculated from stored confirmed bookings, not physical occupancy sensors.
 

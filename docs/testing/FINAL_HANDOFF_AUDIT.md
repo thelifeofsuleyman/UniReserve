@@ -1,6 +1,6 @@
 # UniReserve — Final Technical Handoff Audit
 
-**Audit date:** 23 November 2026 · **Source of truth:** merged \`main\` at \`d8dad20a0ff65aa7f148382426001761d01e8d47\` (CR-004), plus accompanying GitHub Actions results. No local Windows browser session or KOICA session was accessible to this audit.
+**Audit date:** 23 November 2026 · **Source of truth:** merged `main` at `d8dad20a0ff65aa7f148382426001761d01e8d47` (CR-004), plus accompanying GitHub Actions results. No local Windows browser session or KOICA session was accessible to this audit.
 
 ## 1. Automated functional and technical checks
 Latest [main CI run 45110603568](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45110603568) completed successfully:
@@ -13,7 +13,7 @@ Latest [main CI run 45110603568](https://github.com/thelifeofsuleyman/UniReserve
 - This is **not a claim** of multi-user load testing in a production AzTU deployment.
 
 ## 2. Final visual source/layout review
-Source inspected in \`src/unireserve/web/templates/resources.html\`, \`studio.html\`, \`partials/studio_seat.html\` and \`static/room-design.css\`, with CR-004 integration tests:
+Source inspected in `src/unireserve/web/templates/resources.html`, `studio.html`, `partials/studio_seat.html` and `static/room-design.css`, with CR-004 integration tests:
 
 | Example area | Expected logic | Verified source contract |
 |---|---|---|
@@ -25,7 +25,7 @@ Source inspected in \`src/unireserve/web/templates/resources.html\`, \`studio.ht
 The four room-specific JPEG assets and Jinja image references exist in the committed repo. The old screenshot showing six miscellaneous items and no spaces was addressed by the idempotent local demo-area initialization. A screenshot of the **latest version on the owner's Windows PC** is not available to this audit, so pixel-perfect local rendering and user comfort cannot be independently certified.
 
 ## 3. PDF and structure review
-\`docs/submission/\` contains exactly six assessed PDFs, source Markdown, 16 PlantUML sources and 32 rendered diagrams. [CR-004 PDF validation run 45110485448](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45110485448) successfully generated/validated the six documents; the submission script checks non-empty pages, expected report terms, 16 design-model pages, and 1–2 reflection pages. **Human visual inspection of all pages is still recommended; CI PDF parsing is not equivalent to a typography/pagination review.**
+`docs/submission/` contains exactly six assessed PDFs, source Markdown, 16 PlantUML sources and 32 rendered diagrams. [CR-004 PDF validation run 45110485448](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45110485448) successfully generated/validated the six documents; the submission script checks non-empty pages, expected report terms, 16 design-model pages, and 1–2 reflection pages. **Human visual inspection of all pages is still recommended; CI PDF parsing is not equivalent to a typography/pagination review.**
 
 ## 4. Defect and change evidence
 - **CR-001:** initial visual design/availability indicator.
