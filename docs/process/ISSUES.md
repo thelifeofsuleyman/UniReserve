@@ -13,7 +13,7 @@ This is a concise retrospective record of actual work and remaining gaps. GitHub
 - [x] M5 — Flask web UI, login/logout, booking/catalogue/admin routes, CSRF and HTTP tests — PR #4.
 - [x] M5.5 — Owner-driven UI redesign, resource artwork, 2D interactive map, 15-minute status semantics, acceptance tests — PR #5 / CR-001.
 - [x] M6 — Formal test plan, 36 executed case references, coverage, defect log and NFR-001 latency probe — PR #6.
-- [ ] M7 — Traceability of all 11 Must requirements, documented code/design deviations, supplementary CR-001 sequence — PR #7 (pending final CI/merge).
+- [x] M7 — Traceability of all 11 Must requirements, documented code/design deviations, supplementary CR-001 sequence — PR #7; model and traceability CI passed.
 
 ## Remaining / intentionally open
 

@@ -114,3 +114,15 @@ The test package includes a [formal test plan](docs/testing/TEST_PLAN.md), [trac
 ## Milestone 7: Traceability and design reconciliation
 
 [Requirement-to-design-to-code-to-test matrix](docs/traceability/MATRIX.md) maps all 11 Must functional requirements to use cases, PlantUML models, real files and verified CI tests. The supplementary [CR-001 sequence](docs/diagrams/source/14-seq-CR-001-studio.puml) documents the new Studio status API. Known differences between conceptual design patterns and the implementation are disclosed; physical checkout and quota extensions remain deferred, and human usability/accessibility measurements remain open.
+
+### Rebuild PDFs on your own machine
+
+The source PDFs and diagrams are committed to `docs/submission/`. To regenerate with Python 3.11+, run:
+
+```powershell
+python -m pip install reportlab pypdf Pillow
+python scripts/build_submission_docs.py
+python scripts/validate_submission.py
+```
+
+These commands are for documentation generation only; the web UI continues to run with `requirements-dev.txt`. The reflection PDF is a **draft requiring the student's personal review** and the non-measured usability/keyboard checks must not be represented as completed.
