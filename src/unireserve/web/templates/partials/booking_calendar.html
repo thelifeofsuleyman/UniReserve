@@ -1,0 +1,31 @@
+<section class="booking-calendar" id="booking-calendar"
+         data-api-url="{{ url_for('resource_calendar', resource_id=resource.id) }}"
+         data-initial-date="{{ calendar_date }}"
+         aria-labelledby="booking-calendar-title">
+  <div class="booking-calendar__header">
+    <div>
+      <span class="eyebrow">PLAN YOUR VISIT</span>
+      <h3 id="booking-calendar-title">Availability calendar</h3>
+      <p>See reserved times before choosing your slot.</p>
+    </div>
+    <span class="booking-calendar__timezone">Asia/Baku</span>
+  </div>
+  <div class="booking-calendar__navigation">
+    <button type="button" class="booking-calendar__arrow" id="calendar-previous" aria-label="Previous day">‹</button>
+    <label for="calendar-date" class="sr-only">Date for available time slots</label>
+    <input type="date" id="calendar-date" value="{{ calendar_date }}"
+           min="{{ calendar_min }}" max="{{ calendar_max }}">
+    <button type="button" class="booking-calendar__arrow" id="calendar-next" aria-label="Next day">›</button>
+  </div>
+  <div class="booking-calendar__legend" aria-label="Reservation availability legend">
+    <span><i class="booking-calendar__dot dot-available"></i>Free</span>
+    <span><i class="booking-calendar__dot dot-booked"></i>Reserved</span>
+    <span><i class="booking-calendar__dot dot-mine"></i>Your other booking</span>
+    <span><i class="booking-calendar__dot dot-closed"></i>Closed / past</span>
+  </div>
+  <p class="booking-calendar__status" id="calendar-status" aria-live="polite">Loading available times…</p>
+  <div class="booking-calendar__slots" id="calendar-slots" role="group"
+       aria-label="Select an available booking time"></div>
+  <p class="booking-calendar__selection" id="calendar-selection" aria-live="polite"></p>
+  <p class="booking-calendar__hint">Green times are free for that half-hour. Select one to fill the form below, and adjust the end time if needed. Final availability is confirmed when you book.</p>
+</section>

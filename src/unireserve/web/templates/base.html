@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='refined.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='room-design.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='booking-calendar.css') }}">
 </head>
 <body class="{{ 'auth-page' if not g.user else 'dashboard-page' }}">
 {% if g.user %}
