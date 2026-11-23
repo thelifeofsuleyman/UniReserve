@@ -58,6 +58,20 @@ class ResourceRecord:
     is_enabled: bool
 
 
+
+
+@dataclass(frozen=True)
+class PendingRequestRecord:
+    """Approval inbox display record, visible exclusively to administrators."""
+    id: int
+    user_email: str
+    resource_name: str
+    resource_code: str
+    start_utc: datetime
+    end_utc: datetime
+    status: str
+
+
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -149,6 +163,29 @@ class BookingService:
             self._actor(session, actor_id)
             return [_resource_view(r) for r in session.scalars(select(Resource).order_by(Resource.id)).all()]
 
+
+    def get_resource(self, actor_id: int, resource_id: int) -> ResourceRecord:
+        """Inspect a resource; identity is verified against current DB account."""
+        with Session(self.engine) as session:
+            self._actor(session, actor_id)
+            return _resource_view(self._resource(session, resource_id))
+
+    def list_pending(self, actor_id: int) -> list[PendingRequestRecord]:
+        """Administrator-only approval queue; requesters' emails are not public."""
+        with Session(self.engine) as session:
+            self._actor(session, actor_id, admin=True)
+            rows = session.execute(
+                select(Reservation, User.email, Resource.name, Resource.public_code)
+                .join(User, Reservation.user_id == User.id)
+                .join(Resource, Reservation.resource_id == Resource.id)
+                .where(Reservation.status == "PENDING_APPROVAL")
+                .order_by(Reservation.created_utc, Reservation.id)
+            ).all()
+            return [PendingRequestRecord(b.id, email, name, code,
+                                         _from_naive_utc(b.start_utc), _from_naive_utc(b.end_utc),
+                                         b.status)
+                    for b, email, name, code in rows]
+
     def available(self, actor_id: int, resource_id: int, window: TimeWindow) -> bool:
         with Session(self.engine) as session:
             self._actor(session, actor_id)
@@ -177,7 +214,7 @@ class BookingService:
             booking = Reservation(user_id=actor.id, resource_id=resource.id,
                                   start_utc=start, end_utc=end, status=status, created_utc=moment)
             session.add(booking)
-            session.flush()
+            session.flush()  # event must reference persisted booking ID
             self._event(session, booking, actor.id, "CREATED", None, status, moment)
             return _view(booking)
 
