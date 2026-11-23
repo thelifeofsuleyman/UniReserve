@@ -458,8 +458,31 @@ def create_app(test_config: dict | None = None) -> Flask:
     def my_reservations():
         bookings = service.list_own(actor_id())
         names = {r.id: r for r in service.list_resources(actor_id(), include_hidden=True)}
+        utc_now = datetime.now(timezone.utc)
+        local_today = utc_now.astimezone(display_zone).date()
+        week_days = []
+        for offset in range(7):
+            selected_day = local_today + timedelta(days=offset)
+            entries = []
+            for booking in bookings:
+                when = booking.start_utc.astimezone(display_zone)
+                if (when.date() == selected_day and booking.end_utc > utc_now and
+                    booking.status in ("CONFIRMED", "PENDING_APPROVAL")):
+                    entries.append({
+                        "id": booking.id,
+                        "status": booking.status,
+                        "name": names[booking.resource_id].name if booking.resource_id in names else "Study space",
+                        "from": when.strftime("%H:%M"),
+                        "until": booking.end_utc.astimezone(display_zone).strftime("%H:%M"),
+                    })
+            week_days.append({
+                "label": selected_day.strftime("%a"),
+                "day": selected_day.strftime("%d"),
+                "is_today": offset == 0,
+                "entries": sorted(entries, key=lambda e: e["from"]),
+            })
         return render_template("my_reservations.html", page_title="My reservations", bookings=bookings[::-1],
-                               resource_names=names, utc_now=datetime.now(timezone.utc))
+                               resource_names=names, utc_now=utc_now, week_days=week_days)
 
     @app.get("/reservations/<int:reservation_id>")
     @login_required
