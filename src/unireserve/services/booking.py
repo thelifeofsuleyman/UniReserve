@@ -436,10 +436,12 @@ class BookingService:
 
                 if not resource.is_enabled or not day_open:
                     state = "CLOSED"
+                elif overlaps(confirmed):
+                    # A confirmed 10:00–11:00 stays visibly reserved at
+                    # 10:15 instead of turning gray just because it began.
+                    state = "BOOKED"
                 elif begin_utc <= moment or begin_utc > moment + timedelta(days=14):
                     state = "PAST"
-                elif overlaps(confirmed):
-                    state = "BOOKED"
                 elif overlaps(closures):
                     state = "CLOSED"
                 elif overlaps(own_elsewhere):

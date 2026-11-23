@@ -60,6 +60,16 @@ class CalendarServiceTests(unittest.TestCase):
         self.assertEqual(state(other,"10:30"),"BOOKED")
         self.assertEqual(state(other,"11:00"),"AVAILABLE")
 
+    def test_booked_slot_stays_red_after_start_but_before_end(self):
+        self.service.request(self.owner,self.units["AZ-LP-01"].id,time_window(),now=NOW)
+        during = datetime(2026,11,24,10,15,tzinfo=BAKU)
+        slots = self.service.calendar_day(
+            self.other,self.units["AZ-LP-01"].id,DAY,now=during
+        )["slots"]
+        self.assertEqual(state(slots,"10:00"),"BOOKED")
+        self.assertEqual(state(slots,"10:30"),"BOOKED")
+        self.assertEqual(state(slots,"09:30"),"PAST")
+
     def test_cancelled_booking_releases_red_slots(self):
         booking=self.service.request(self.owner,self.units["AZ-LS-01"].id,time_window(),now=NOW)
         self.assertEqual(state(self.calendar(self.other,"AZ-LS-01"),"10:00"),"BOOKED")
