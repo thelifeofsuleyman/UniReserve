@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from flask import (Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request,
                    session, url_for)
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import SecurityError
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -124,6 +125,12 @@ def create_app(test_config: dict | None = None) -> Flask:
         if g.user is None:
             raise AccessDenied("authentication is required")
         return g.user.id
+
+    @app.errorhandler(SecurityError)
+    def bad_host(_exc):
+        # Invalid Host may fail before routing; Jinja/url_for would repeat
+        # the same validation and incorrectly convert a 400 into a 500.
+        return "Invalid request", 400
 
     @app.before_request
     def load_user_and_check_csrf():
