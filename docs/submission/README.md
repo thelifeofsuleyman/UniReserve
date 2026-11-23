@@ -19,3 +19,7 @@ E (the implementation) is the working `src/` code and `tests/` suite, not a stan
 **The demo is not official AzTU booking infrastructure.** Room labels, seat counts, images, classroom access, opening hours and physical position layouts are illustrative. The software infers status from stored confirmed bookings, not live sensor measurements.
 
 The repository is **private**. A lecturer cannot view it without authorized GitHub access. See [KOICA_HANDOFF.md](KOICA_HANDOFF.md) before submitting and keep a KOICA submission receipt. Neither GitHub CI nor this document constitutes a KOICA upload confirmation.
+
+
+## CR-005 — Final presentation and hosting notes
+The website's public-facing screens now prioritize booking actions rather than repeating coursework/setup notes. A dedicated Service information page retains honest source and occupancy limitations. Production-mode WSGI/security configuration and administrator-managed area/account setup are documented in `docs/deployment/OPERATIONS.md` and CR-005. No live hosted URL or institution-approved access has been asserted. All assessed PDFs are rebuilt and checked by the GitHub export workflow.

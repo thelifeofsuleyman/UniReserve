@@ -20,3 +20,6 @@ Status colors reflect confirmed reservation records, not physical occupancy. Ima
 
 ## Remaining user acceptance checks
 Actual Windows screenshot of the **latest** CR-004 version, full student/admin booking walkthrough, mobile and keyboard-only exploration. NFR-006 five-volunteer results have not been collected. Document any subsequent feedback with date and concrete evidence.
+
+
+| UX-006 | 2026-11-23 | Owner requested removal of repetitive AI-style reminders, demo instructions and disclaimers from the booking interface, and asked for a more production-facing service. | CR-005 | Main screens simplified; source caveats consolidated in Service information and engineering reports. Production-mode configuration and admin room setup added. Public hosting not claimed. |

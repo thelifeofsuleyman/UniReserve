@@ -23,3 +23,7 @@ The repo includes `README.md`, `src/`, `tests/`, `docs/`, six PDF deliverables i
 
 ## Submission status
 **NOT SUBMITTED via KOICA in this chat.** No authorized KOICA login, instructor account, or submission receipt was available to the assistant. Only the user can confirm actual portal submission and approve the personal reflection.
+
+
+## Production-presentation change (CR-005)
+The cleaner interface and managed WSGI startup do not change the required GitHub URL or imply public hosting. The academic report remains explicit about illustrative campus resources and AI assistance. The private repository still needs lecturer access and the actual submission through KOICA still requires portal confirmation.

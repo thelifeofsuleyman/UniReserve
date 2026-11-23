@@ -31,3 +31,10 @@ Completed items reflect actual merged PRs, not invented task-board activity.
 - [ ] Payment, equipment returns, priority scheduling, campus SSO and production hardening (outside assessed v1 scope).
 
 Repository: https://github.com/thelifeofsuleyman/UniReserve
+
+
+## CR-005 — Production-oriented presentation
+- [x] Replace repetitive student-project UI language with actionable customer copy.
+- [x] Provide `/about` for truthful source/occupancy limitations.
+- [x] Add Waitress, secure production-mode settings, account creation and admin area creation.
+- [ ] Real domain + HTTPS reverse proxy, institutional room/identity approval, rate limiting and backup restore drill remain separate deployment tasks.

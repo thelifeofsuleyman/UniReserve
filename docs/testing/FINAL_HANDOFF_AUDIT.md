@@ -43,3 +43,7 @@ The four room-specific JPEG assets and Jinja image references exist in the commi
 - Submission through KOICA: **not performed or confirmed**.
 
 **Assessment:** Technical repository is complete for a coursework prototype. Its real-world AzTU assumptions and outstanding personal/external steps must remain explicit.
+
+
+## Post-audit addendum — CR-005
+This original audit recorded the tested CR-004 baseline. The owner's later request led to cleaner user-facing copy, a separate service-information screen, a managed Waitress/HTTPS deployment configuration and admin-configured Space creation. New QA evidence is in `docs/testing/CR-005_TEST_ADDENDUM.md` and the corresponding latest GitHub Actions result. No public website, real campus inventory or real-world usability study is asserted by these modifications.
