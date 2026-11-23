@@ -1,0 +1,98 @@
+@startuml
+title UniReserve - Design Class Diagram
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+class User <<Entity>> {
+  - id: int
+  - email: str
+  - password_hash: str
+  - role: Role
+  + is_admin(): bool
+}
+class Resource <<Entity>> {
+  - id: int
+  - category: Category
+  - requires_approval: bool
+  - is_enabled: bool
+}
+class Reservation <<Entity>> {
+  - id: int
+  - user_id: int
+  - resource_id: int
+  - start_utc: datetime
+  - end_utc: datetime
+  - status: ReservationStatus
+  + can_cancel(now: datetime): bool
+}
+class ReservationEvent <<Entity>> {
+  - id: int
+  - reservation_id: int
+  - actor_user_id: int
+  - action: str
+  - occurred_utc: datetime
+}
+class AuthService <<Service Layer>> {
+  + login(email: str, password: str): Session
+  + logout(session: Session): None
+  + require_role(user: User, role: Role): None
+}
+class ResourceService <<Service Layer>> {
+  + list_resources(): list
+  + check_availability(resource_id, window): bool
+  + create_or_edit_resource(user, data): Resource
+  + disable_resource(user, id): None
+}
+class BookingService <<Service Layer>> {
+  + request_booking(user, resource_id, window): Reservation
+  + list_own(user): list
+  + cancel(user, reservation_id, now): Reservation
+  + decide(admin, reservation_id, approve): Reservation
+  - assert_no_confirmed_overlap(resource_id, window): None
+}
+interface ReservationRepository <<Repository>> {
+  + get(id): Reservation
+  + find_confirmed_overlaps(resource_id, window): list
+  + save(reservation): None
+}
+interface ResourceRepository <<Repository>> {
+  + get(id): Resource
+  + list_all(): list
+  + save(resource): None
+}
+interface UserRepository <<Repository>> {
+  + find_by_email(email): User
+}
+interface UnitOfWork <<Unit of Work>> {
+  + begin_immediate(): None
+  + commit(): None
+  + rollback(): None
+}
+class SqliteUnitOfWork <<Adapter>> {
+  + begin_immediate(): None
+  + commit(): None
+  + rollback(): None
+}
+class TimeWindow <<Value Object>> {
+  + start: datetime
+  + end: datetime
+  + overlaps(other: TimeWindow): bool
+}
+AuthService ..> UserRepository : uses
+BookingService ..> ReservationRepository : uses
+BookingService ..> ResourceRepository : uses
+BookingService ..> UnitOfWork : transaction
+BookingService ..> TimeWindow : validates
+ResourceService ..> ResourceRepository
+ResourceService ..> ReservationRepository : availability
+ResourceService ..> UnitOfWork
+UnitOfWork <|.. SqliteUnitOfWork
+User "1" -- "0..*" Reservation : owns
+Resource "1" -- "0..*" Reservation
+Reservation "1" *-- "0..*" ReservationEvent
+User "1" -- "0..*" ReservationEvent : actor
+note right of BookingService
+  Request and approval use BEGIN IMMEDIATE.
+  Recheck confirmed conflicts inside transaction,
+  then persist state and audit event atomically.
+end note
+@enduml

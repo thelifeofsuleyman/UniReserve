@@ -1,0 +1,49 @@
+@startuml
+title UniReserve - Layered Architecture (Modular Monolith)
+skinparam componentStyle rectangle
+skinparam shadowing false
+actor "Student / Staff / Admin" as User
+package "Presentation - Flask" {
+  [HTML templates / Browser] as Browser
+  [Auth routes] as AuthRoutes
+  [Booking routes] as BookingRoutes
+  [Admin routes] as AdminRoutes
+}
+package "Application Services" {
+  [AuthService] as AuthService
+  [BookingService] as BookingService
+  [ResourceService] as ResourceService
+}
+package "Domain" {
+  [TimeWindow / Overlap Rules] as TimeWindow
+  [Reservation State Rules] as StateRules
+}
+package "Persistence" {
+  [Repositories] as Repositories
+  [SQLiteUnitOfWork] as UOW
+  database "SQLite" as DB
+}
+User --> Browser
+Browser --> AuthRoutes
+Browser --> BookingRoutes
+Browser --> AdminRoutes
+AuthRoutes --> AuthService
+BookingRoutes --> BookingService
+BookingRoutes --> ResourceService
+AdminRoutes --> BookingService
+AdminRoutes --> ResourceService
+AuthService --> Repositories
+BookingService --> TimeWindow
+BookingService --> StateRules
+BookingService --> Repositories
+BookingService --> UOW
+ResourceService --> Repositories
+ResourceService --> UOW
+Repositories --> DB
+UOW --> DB
+note bottom of UOW
+  BEGIN IMMEDIATE for booking decisions:
+  check confirmed conflicts, write reservation
+  and audit record, commit or rollback as one unit.
+end note
+@enduml

@@ -1,0 +1,61 @@
+name: Validate and export architecture diagrams
+
+on:
+  push:
+    branches: [design/uml-architecture]
+    paths:
+      - 'docs/diagrams/source/**'
+      - 'docs/diagrams/README.md'
+      - 'scripts/validate_models.py'
+      - '.github/workflows/render-diagrams.yml'
+  pull_request:
+    paths:
+      - 'docs/diagrams/**'
+      - 'scripts/validate_models.py'
+
+permissions:
+  contents: write
+
+jobs:
+  diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify requirement/model consistency
+        run: python scripts/validate_models.py
+      - name: Install PlantUML and Graphviz
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq plantuml graphviz
+      - name: Render all diagrams as PNG and SVG
+        run: |
+          mkdir -p docs/diagrams/rendered
+          plantuml -charset UTF-8 -tsvg -o ../rendered docs/diagrams/source/*.puml
+          plantuml -charset UTF-8 -tpng -o ../rendered docs/diagrams/source/*.puml
+          python - <<'PY'
+          from pathlib import Path
+          sources=list(Path("docs/diagrams/source").glob("*.puml"))
+          exports=Path("docs/diagrams/rendered")
+          assert len(sources)==13, len(sources)
+          for source in sources:
+              for ext in (".svg",".png"):
+                  target=exports / (source.stem+ext)
+                  assert target.exists() and target.stat().st_size>100, target
+              svg=(exports / (source.stem+".svg")).read_text(encoding="utf-8")
+              assert "Syntax Error" not in svg and "<svg" in svg, source
+          print(f"Rendered and inspected {len(sources)} diagrams to PNG+SVG.")
+          PY
+      - name: Publish exported diagram images to branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/design/uml-architecture'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/diagrams/rendered/
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: export architecture diagrams from PlantUML sources"
+            git push
+          fi

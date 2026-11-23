@@ -1,0 +1,53 @@
+@startuml
+title UniReserve - Conceptual Domain Model
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide methods
+class User <<domain concept>> {
+  userId
+  email
+  role
+}
+class Resource <<domain concept>> {
+  resourceId
+  publicCode
+  name
+  category
+  enabled
+  approvalRequired
+}
+class Reservation <<domain concept>> {
+  reservationId
+  startTimeUTC
+  endTimeUTC
+  status
+}
+class ReservationEvent <<domain concept>> {
+  eventId
+  timestampUTC
+  action
+  previousStatus
+  newStatus
+}
+enum Role {
+  STUDENT
+  STAFF
+  ADMIN
+}
+enum ReservationStatus {
+  PENDING_APPROVAL
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+User "1" -- "0..*" Reservation : requests >
+Resource "1" -- "0..*" Reservation : reserved by >
+Reservation "1" *-- "1..*" ReservationEvent : history >
+User "1" -- "0..*" ReservationEvent : acts on >
+User ..> Role
+Reservation ..> ReservationStatus
+note right of Reservation
+  Pending does not reserve capacity.
+  Only confirmed reservations block slots.
+end note
+@enduml
