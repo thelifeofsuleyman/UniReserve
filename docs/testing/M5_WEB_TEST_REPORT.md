@@ -27,7 +27,7 @@ Entry: Python dependencies install; temporary test databases can be created; tes
 
 **Local static verification:** Python compileall completed. The 35 existing milestone-4 domain/database tests passed locally before publishing milestone 5. Full web tests require Flask, which must be installed by `pip install -r requirements-dev.txt` in the student environment or GitHub Actions.
 
-**GitHub Actions:** Workflow `Python unit and integration tests` installs the new Flask + tzdata dependencies and runs all tests with package coverage. Inspect the most recent green run in the repository Actions tab. The definitive run ID, total tests, coverage percentage and conclusion should be recorded after a verified run rather than invented here.
+**GitHub Actions verified results (23 November 2026):** The `Python unit and integration tests` workflow passed on the merged main commit `977ed16f29af4f88a3466cd209850b9bf4ac0094`, run [45100406375](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45100406375). Results: **63 tests passed**, **94% overall statement coverage** (591 measured statements; 33 uncovered), and model consistency PASS (13 diagrams, 18 FR, 8 NFR, 6 use cases, 11 Must criteria). The suite includes 50 synchronized two-client booking race trials with zero conflicting confirmed bookings. The two new HTTP usability regression tests passed on PR run [45100294858](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45100294858). These are automated results; a real-browser usability study and the final comprehensive defect/traceability reports remain outstanding.
 
 ## Defect tracking and feedback
 
