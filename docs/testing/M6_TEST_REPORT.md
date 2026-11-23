@@ -4,7 +4,7 @@
 
 ## Summary of verified baseline
 
-The latest verified code integration for the visual redesign (CR-001) passed **85 automated tests in 9.556 seconds** with **94% statement coverage** over `src/unireserve`. The results were obtained through [GitHub Actions 45103587996](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45103587996) using Python **3.11.18** on Ubuntu. This report is tied to that actual run; later performance runs are separately documented.
+The visual redesign passed **85 automated tests in 9.556 seconds** with **94% statement coverage** in [CI 45103587996](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45103587996). A separate [Milestone 6 run 45103990514](https://github.com/thelifeofsuleyman/UniReserve/actions/runs/45103990514) passed **85 tests in 12.189 seconds** with **94% coverage** and **200/200 HTTP latency checks** on Python 3.11.18 Ubuntu.
 
 ### Code coverage
 
@@ -38,7 +38,7 @@ Source: the exact coverage output in the linked CI log. Coverage is rounded to t
 
 | NFR | Verification | Status |
 |---|---|---|
-| NFR-001 | 200 sequential HTTP requests; 100 resources, 1,000 reservations | **Performance probe added; measured run results in M6_PERFORMANCE_REPORT.md.** |
+| NFR-001 | 200 sequential HTTP requests; 100 resources, 1,000 reservations | **PASS:** 200/200 requests under 1.0 second; p95 0.03152s; see M6_PERFORMANCE_REPORT.md. |
 | NFR-002 | 50 synchronized database race trials | PASS in CI 45103587996 |
 | NFR-003 | HTTP and service-layer denial cases | PASS for tested cases; not a penetration audit |
 | NFR-004 | Salted password-hash tests | PASS for seeded users |
@@ -53,4 +53,4 @@ Real-world setup issue ENV-001, original UI concern UX-001, and hosted preview l
 
 ## Exit assessment
 
-Automated testing and coverage targets **pass** for the verified run. Latency evidence is collected in the following CI milestone. Manual usability/accessibility criteria remain **open**, and final quality assurance must not represent them as completed. The project is an offline local coursework prototype, not a production-secured multi-campus application.
+Automated testing and coverage targets **pass** for the verified run. The measured latency target also passes for the synthetic CI fixture. Manual usability/accessibility criteria remain **open**, and final quality assurance must not represent them as completed. The project is an offline local coursework prototype, not a production-secured multi-campus application.
