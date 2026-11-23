@@ -63,3 +63,7 @@ The supplementary sequence [14](source/14-seq-CR-001-studio.puml) links the auth
 ## CR-002 — AzTU-based study space and PC seat extension
 
 The original [logical 3NF ERD](source/05-erd-logical-3nf.puml) describes the four-table booking baseline. A supplementary [space/closure ERD](source/15-aztu-space-extension.puml) adds the normalized Space and SpaceClosure tables, nullable Resource.space_id and Resource.is_listed. [Booking hours sequence](source/16-aztu-booking-hours-sequence.puml) demonstrates server-side weekday/hours/closure checks before transactional confirmation. The live code must be verified with the CR-002 tests; illustrative desk layout is not a surveyed campus plan. The extension preserves existing reservation history. Published office hours are not blanket teaching-lab schedules; sample areas are demo data.
+
+
+### CR-003 design addendum (booking integrity)
+The request and approval sequence diagrams already require an atomic conflict recheck. In this revision `BookingService` performs **two** queries inside that transaction for demo study resources: per-resource confirmed overlap and per-user confirmed overlap across assigned study Spaces. Pending approvals do not hold capacity. The new second check does not require a schema change. The generic conflict message in the diagrams should be interpreted to cover both checks; see `CR-003-TRACEABILITY.md` for exact test links.

@@ -49,7 +49,11 @@ class AzTUBookingPolicyTests(unittest.TestCase):
         first=self.units['AZ-LP-01']
         second=self.units['AZ-LP-02']
         self.svc.request(self.student,first.id,self.window(),now=NOW)
-        self.assertTrue(self.svc.available(self.student,second.id,self.window()))
+        # Physically PC 02 is free. This student already holds PC 01,
+        # so the demo fairness policy blocks a simultaneous second PC.
+        self.assertFalse(self.svc.available(self.student,second.id,self.window()))
+        other = provision_demo_user(self.engine,'other-seat@example.invalid','test-password-2','STUDENT')
+        self.assertTrue(self.svc.available(other,second.id,self.window()))
         self.assertFalse(self.svc.available(self.student,first.id,self.window()))
     def test_weekend_rejected_and_no_audit(self):
         with self.assertRaises(InvalidRequest):

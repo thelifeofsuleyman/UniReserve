@@ -1,5 +1,5 @@
 # UniReserve — Software Requirements Specification
-**Version:** 1.0 baseline — pending simulated-stakeholder confirmation  
+**Version:** 1.1 updated baseline (CR-003) — pending simulated-stakeholder confirmation  
 **Prepared for:** Suleyman Shafizada (group m666i1)  
 **Date:** 23 November 2026  
 **Source:** SWE_P1.pdf, project idea 6: Equipment and Room Rental System.
@@ -35,7 +35,7 @@ These are analytical roles, not people interviewed for this document.
 | BR-02 | Intervals A and B overlap if A.start < B.end and B.start < A.end; adjacent bookings are permitted. |
 | BR-03 | A request starts in the future and no more than 14 days ahead. |
 | BR-04 | Maximum duration is two hours for a room and 24 hours for equipment (provisional policy). |
-| BR-05 | No two CONFIRMED reservations for one resource overlap; conflict checks and confirmation occur in a database write transaction. |
+| BR-05 | No two CONFIRMED reservations for one resource overlap. In the AzTU-inspired demo, a student cannot hold two overlapping CONFIRMED study places even if they are different resources. Both checks run in the same database transaction. The student limit is a project fair-use assumption, not a verified AzTU policy. |
 | BR-06 | A resource marked requires_approval creates PENDING_APPROVAL; pending requests do not block capacity. |
 | BR-07 | Approval atomically rechecks enabled status and confirmed conflicts. If blocked, no state change occurs and the request remains pending. |
 | BR-08 | A user can cancel their own pending/confirmed reservation only before the start; terminal bookings cannot be cancelled again. |
@@ -53,7 +53,7 @@ Each requirement has a stable identifier. Every Must has acceptance criteria in 
 | FR-002 | Must | Display the resource catalogue with stable ID, name, category, enabled status and approval flag. |
 | FR-003 | Must | Report whether an enabled resource is available for a specified valid time range, considering confirmed reservations. |
 | FR-004 | Must | Let authenticated students and staff request an enabled resource in a valid future time range. |
-| FR-005 | Must | Prevent overlapping CONFIRMED reservations for the same resource, including concurrent requests and approval actions. |
+| FR-005 | Must | Prevent overlapping CONFIRMED reservations for the same resource, including concurrent requests and approval actions; in demo study areas also prevent the same user from holding overlapping confirmed study places. |
 | FR-006 | Must | Show users only their own reservation details and statuses. |
 | FR-007 | Must | Permit the owner to cancel a PENDING_APPROVAL or CONFIRMED reservation before its start time. |
 | FR-008 | Must | Allow administrators to approve or reject pending requests with an availability recheck on approval. |
@@ -75,7 +75,7 @@ Each requirement has a stable identifier. Every Must has acceptance criteria in 
 | FR-002 | A signed-in user sees all seeded resources with these fields, and authorized changes appear in the catalogue. |
 | FR-003 | A confirmed 10:00–12:00 booking conflicts with 11:00–13:00 but not 12:00–13:00; disabled resources are not bookable. |
 | FR-004 | Valid normal-resource request becomes CONFIRMED; approval-required request becomes PENDING_APPROVAL; invalid ranges create no row. |
-| FR-005 | For 50 pairs of simultaneous conflicting confirmations, at most one per pair commits and zero conflicting confirmed rows persist. |
+| FR-005 | For 50 pairs of simultaneous conflicting confirmations, at most one per pair commits and zero conflicting confirmed rows persist. One student cannot hold two concurrent study places; different students can book distinct resources. |
 | FR-006 | User A's list contains A's bookings only; accessing B's reservation by ID does not disclose it. |
 | FR-007 | Eligible owner cancellation changes status to CANCELLED; cancellation by others, after start, or on terminal states fails. |
 | FR-008 | Admin approve confirms an available request, reject sets REJECTED; conflicts/disabled resources block approval; other roles cannot decide. |
@@ -154,3 +154,8 @@ Official product pages consulted 23 November 2026.
 ## CR-002 — University PC and seat-booking extension (23 Nov 2026)
 
 The original baseline scope included equipment lending. A user-requested change refocuses the demonstrator on **library study seats, library PCs and teaching-lab workstations**. For new demonstration areas, each seat/PC is an individually reservable Resource belonging to a Space; no student can book an entire PC laboratory merely by requesting one workstation. Reservations must fit the area's configurable local operating hours and weekdays, cannot overlap an administrator closure, and still obey FR-005 concurrency protection. Hidden legacy demo equipment is not bookable, but historical records remain. Detailed new rules AZ-01 through AZ-06, sourced facts vs illustrative campus assumptions, tests and impact are maintained in `docs/change-management/CR-002-aztu-seat-reservations.md`. Library hours 09:00–17:30 are publicly referenced by AzTU; assigned demo weekdays, room identities and PC quantities are *not* verified AzTU facts. The original FR IDs and Must acceptance criteria remain traceable, while this extension refines their policy and catalogue acceptance conditions.
+
+
+## CR-003: user-level fairness and visual review
+
+Actual owner feedback reported that the previous UI felt visually generic. The new UI uses original offline illustrative images, stronger hierarchy, a filterable 2D map, and synchronizes color+text status indicators. The proposed fair-use rule extends BR-05 and FR-005 without renumbering the requirements. The system also prevents an administrator edit from silently invalidating future confirmed reservations. See `docs/change-management/CR-003-ux-and-integrity.md`. Real AzTU seat assignment and the one-simultaneous-booking policy remain **unverified demonstration assumptions**.
